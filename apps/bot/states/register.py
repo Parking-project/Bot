@@ -1,6 +1,6 @@
 from aiogram.fsm.state import State, StatesGroup
 
 class Register_State(StatesGroup):
-    LOGIN = State()
-    PASSWORD = State()
-    DISPLAY_NAME = State()
+    login = State()
+    password = State()
+    display_name = State()
