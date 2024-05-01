@@ -4,8 +4,7 @@ class ButtonRK:
     AUTH = "Авторизация"
     REG = "Регистрация"
     
-    RESERVE_RESERVE = "Просмотр одобренных бронированний"
-    RESERVE_HISTORY = "Просмотр историю бронирований"
+    SEND_HELP = "Отправка сообщения техподдержке"
     RESERVE_REQUEST = "Просмотр заявки"
     EXIT = "Выход из аккаунта"
 
@@ -22,13 +21,10 @@ def base_rk():
 def auth_rk():
     builder = ReplyKeyboardBuilder()
     builder.button(
-        text=ButtonRK.RESERVE_RESERVE
-    )
-    builder.button(
         text=ButtonRK.RESERVE_REQUEST
     )
     builder.button(
-        text=ButtonRK.RESERVE_HISTORY
+        text=ButtonRK.SEND_HELP
     )
     builder.button(
         text=ButtonRK.EXIT
