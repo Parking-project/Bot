@@ -1,0 +1,11 @@
+mysql-connector-python
+aiogram
+sqlalchemy
+mysqlclient
+pymysql
+bcrypt
+python-dotenv
+pycodestyle
+aiogram_tests
+
+
