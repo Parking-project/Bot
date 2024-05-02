@@ -13,6 +13,7 @@ def send_get_request(url, data, token = None):
         json={},
         headers=headers
     )
+    print("\n\n\nGET = ", headers, "\n\n\n")
     if response.status_code == 500:
         raise Exception(f"Status code is too big: {url} : {response.status_code}\n\n{response.content}")
     return response
@@ -28,6 +29,7 @@ def send_post_request(url, json, token = None):
         json=json,
         headers=headers
     )
+    print("\n\n\POST = ", headers, "\n\n\n")
     if response.status_code == 500:
         raise Exception(f"Status code is too big: {url} : {response.status_code}\n\n{response.content}")
     return response

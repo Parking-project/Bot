@@ -1,18 +1,21 @@
 from .base_requests import send_get_request
-from core.domain.entity import ReserveHistory, ApiResponse
+from core.domain.entity import AuthHistory, ApiResponse
 
-class ReserveHistoryController:
+class AuthHistoryController:
     @classmethod
     def get(cls, page_index, token):
         response_json = send_get_request(
-            "/reserve_history/get",
-            json={
+            "/auth/get",
+            data={
                 "page_index": page_index,
                 "page_size": 10
             },
             token=token
         ).json()
+
+        print("\n\n\n", response_json, "\n\n\n")
+
         if response_json.get("data") is None:
             return ApiResponse(response_json["message"], True)
-        reserve_history_list = [ReserveHistory(**k) for k in response_json["data"]]
-        return ApiResponse(reserve_history_list)
+        auth_list = [AuthHistory(**k) for k in response_json["data"]]
+        return ApiResponse(auth_list)

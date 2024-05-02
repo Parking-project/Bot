@@ -1,14 +1,12 @@
 __all__ = ("router",)
 
 from aiogram import Router
-# from .help_handlers import router as help_router
-# from .auth_handlers import router as auth_router
-# from .reserve_handlers import router as reserve_router
+from .admin import router as admin_callback_router
+from .user import router as user_callback_router
 
 router = Router(name=__name__)
 
 router.include_routers(
-    # auth_router,
-    # reserve_router,
-    # help_router,
+    admin_callback_router,
+    user_callback_router
 )
