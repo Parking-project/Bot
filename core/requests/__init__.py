@@ -1,6 +1,8 @@
 __all__ = (
     "AuthHistoryController",
     "PlaceController",
+    "MessageController",
+    "MessageController",
     "ReserveHistoryController",
     "ReserveController",
     "TokenBlocListController",
@@ -9,6 +11,9 @@ __all__ = (
 )
 
 from .auth_history_requests import AuthHistoryController
+from .place_requests import PlaceController
+from .message_requests import MessageController
+from .document_requests import DocumentController
 from .place_requests import PlaceController
 from .reserve_history_requests import ReserveHistoryController
 from .reserve_requests import ReserveController

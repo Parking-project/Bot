@@ -5,7 +5,7 @@ class TokenBlocListController:
     @classmethod
     def get(cls, page_index, token):
         response_json = send_get_request(
-            "/reserve_history/get",
+            "/token_bloc_list/get",
             json={
                 "page_index": page_index,
                 "page_size": 10

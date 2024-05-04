@@ -38,10 +38,12 @@ class TokenController:
             token=access
         )
         if response.status_code == 200:
-            return ApiResponse("""{
-                "access": "{access}",
-                "refresh": "{refresh}",
-            }""")
+            return ApiResponse(
+                {
+                    "access": access,
+                    "refresh": refresh,
+                }
+            )
         response = send_get_request(
             "/token/refresh",
             json={}, 
@@ -49,16 +51,18 @@ class TokenController:
         )
         if response.status_code == 200:
             access = response.json()["access"]
-            return ApiResponse("""{
-                "access": "{access}",
-                "refresh": "{refresh}",
-            }""")
+            return ApiResponse(
+                {
+                    "access": access,
+                    "refresh": refresh,
+                }
+            )
         return ApiResponse(response.json()["message"], True)
     
     @classmethod
     def logout(cls, token):
         send_get_request(
             "/token/logout",
-            data={},
+            json={},
             token=token
         )

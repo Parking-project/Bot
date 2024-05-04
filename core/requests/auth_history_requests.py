@@ -6,14 +6,12 @@ class AuthHistoryController:
     def get(cls, page_index, token):
         response_json = send_get_request(
             "/auth/get",
-            data={
+            json={
                 "page_index": page_index,
                 "page_size": 10
             },
             token=token
         ).json()
-
-        print("\n\n\n", response_json, "\n\n\n")
 
         if response_json.get("data") is None:
             return ApiResponse(response_json["message"], True)
