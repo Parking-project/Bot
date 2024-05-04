@@ -1,6 +1,6 @@
 from aiogram.fsm.state import State, StatesGroup
 
-class LogIn_State(StatesGroup):
+class LogInState(StatesGroup):
     login = State()
     password = State()
 
