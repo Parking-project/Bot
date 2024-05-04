@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, BotCommand
 
 from apps.shared import ChatTypeFilter
-from apps.bot.states import LogIn_State, Register_State
+from apps.bot.states import LogInState, RegisterState
 from apps.bot.keyboard.reply import ButtonRK, base_rk, auth_rk
 
 from core.requests import TokenController
@@ -19,25 +19,25 @@ router = Router(name=__name__)
                 ChatTypeFilter(chat_type=["private"]), )
 async def command_login(message: Message, state: FSMContext):
     await state.clear()
-    await state.set_state(LogIn_State.login)
+    await state.set_state(LogInState.login)
     await message.answer(
         "Введите логин",
         reply_markup=base_rk()
     )
 
-@router.message(LogIn_State.login)
+@router.message(LogInState.login)
 async def command_login_login(message: Message, state: FSMContext):
     await state.set_data(data={
             "login": message.text
         }
     )
-    await state.set_state(LogIn_State.password)
+    await state.set_state(LogInState.password)
     await message.answer(
         "Введите пароль",
         reply_markup=base_rk()
     )
 
-@router.message(LogIn_State.password)
+@router.message(LogInState.password)
 async def command_login_password(message: Message, state: FSMContext):
     data = await state.get_data()
     await state.clear()
@@ -54,7 +54,7 @@ async def command_login_password(message: Message, state: FSMContext):
             "refresh": response.data["refresh"]
         }
     )
-    await state.set_state(LogIn_State.auth)
+    await state.set_state(LogInState.auth)
     await message.answer(
         f"Вы авторизировались",
         reply_markup=auth_rk()
@@ -69,25 +69,25 @@ async def command_login_password(message: Message, state: FSMContext):
                 ChatTypeFilter(chat_type=["private"]))
 async def command_register(message: Message, state: FSMContext):
     await state.clear()
-    await state.set_state(Register_State.login)
+    await state.set_state(RegisterState.login)
     await message.answer(
         "Введите логин",
         reply_markup=base_rk()
     )
 
-@router.message(Register_State.login)
+@router.message(RegisterState.login)
 async def command_register_login(message: Message, state: FSMContext):
     await state.set_data(data={
             "login": message.text
         }
     )
-    await state.set_state(Register_State.password)
+    await state.set_state(RegisterState.password)
     await message.answer(
         "Введите пароль",
         reply_markup=base_rk()
     )
 
-@router.message(Register_State.password)
+@router.message(RegisterState.password)
 async def command_register_password(message: Message, state: FSMContext):
     data = await state.get_data()
     await state.set_data(data={
@@ -95,13 +95,13 @@ async def command_register_password(message: Message, state: FSMContext):
             "password": message.text
         }
     )
-    await state.set_state(Register_State.display_name)
+    await state.set_state(RegisterState.display_name)
     await message.answer(
         "Введите отображающее имя",
         reply_markup=base_rk()
     )
 
-@router.message(Register_State.display_name)
+@router.message(RegisterState.display_name)
 async def command_register_display_name(message: Message, state: FSMContext):
     data = await state.get_data()
     await state.clear()
@@ -118,7 +118,7 @@ async def command_register_display_name(message: Message, state: FSMContext):
             "refresh": response.data["refresh"]
         }
     )
-    await state.set_state(LogIn_State.auth)
+    await state.set_state(LogInState.auth)
     await message.answer(
         f"Вы авторизировались",
         reply_markup=auth_rk()
@@ -127,10 +127,10 @@ async def command_register_display_name(message: Message, state: FSMContext):
 # endregion
 
 @router.message(F.text == ButtonRK.EXIT,
-                LogIn_State.auth)
+                LogInState.auth)
 @router.message(Command(BotCommand(command="exit", description="Команда выхода из аккаунта")),
                 ChatTypeFilter(chat_type=["private"]), 
-                LogIn_State.auth)
+                LogInState.auth)
 async def command_logout(message: Message, state: FSMContext):
     data = await state.get_data()
     await state.clear()
