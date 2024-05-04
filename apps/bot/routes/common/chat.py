@@ -4,7 +4,7 @@ from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from apps.bot.states import LogIn_State
+from apps.bot.states import LogInState
 from apps.shared import ChatTypeFilter
 
 router = Router(name=__name__)
@@ -21,6 +21,6 @@ async def command_auth_hostory(message: Message, state: FSMContext):
 
 @router.message(Command(BotCommand(command="help", description="auth help")),
                 ChatTypeFilter(chat_type=["private"]),
-                LogIn_State.auth)
+                LogInState.auth)
 async def command_auth_hostory(message: Message, state: FSMContext):
     pass
