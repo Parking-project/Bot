@@ -3,10 +3,9 @@ from aiogram.types import Message, BotCommand
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
-import datetime
 
 from bot.keyboard.inline import *
-from bot.states import LogInState
+from bot.states import AuthState
 from bot.routes.base_func import *
 from bot.keyboard.inline.admin_history import (
     auth_history_action,
@@ -22,13 +21,13 @@ from .base_func import auth_history_print, reserve_history_print, token_bloclist
 router = Router(name=__name__)
 
 
-@router.message(LogInState.auth, 
+@router.message(AuthState.admin, 
                 Command(BotCommand(command="auth_history", description="auth command")))
 async def command_auth_hostory(message: Message, state: FSMContext):
     data = await update_state_tokens(
         message=message,
         state=state,
-        now_state=LogInState.auth
+        now_state=AuthState.admin
     )
     if data is None:
         return
@@ -45,13 +44,13 @@ async def command_auth_hostory(message: Message, state: FSMContext):
         reply_markup=auth_history_action()
     )
 
-@router.message(LogInState.auth, 
+@router.message(AuthState.admin, 
                 Command(BotCommand(command="reserve_history", description="auth command")))
 async def command_reserve_hostory(message: Message, state: FSMContext):
     data = await update_state_tokens(
         message=message,
         state=state,
-        now_state=LogInState.auth
+        now_state=AuthState.admin
     )
     if data is None:
         return
@@ -68,13 +67,13 @@ async def command_reserve_hostory(message: Message, state: FSMContext):
         reply_markup=reserve_history_action()
     )
 
-@router.message(LogInState.auth, 
+@router.message(AuthState.admin, 
                 Command(BotCommand(command="token_bloclist", description="auth command")))
 async def command_reserve_hostory(message: Message, state: FSMContext):
     data = await update_state_tokens(
         message=message,
         state=state,
-        now_state=LogInState.auth
+        now_state=AuthState.admin
     )
     if data is None:
         return

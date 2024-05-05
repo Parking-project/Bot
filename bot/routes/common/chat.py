@@ -6,11 +6,7 @@ from aiogram.types import Message, BotCommand
 
 from aiogram.filters import Command, CommandStart
 
-from bot.shared import ChatTypeFilter
 from bot.states import AuthState, HelpState
-from bot.keyboard.reply import AuthRK, UserRK
-
-from core.requests import TokenController
 
 router = Router(name=__name__)
 

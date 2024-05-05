@@ -1,7 +1,6 @@
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
-from aiogram.filters import Command, CommandStart
-from aiogram.types import Message, BotCommand
+from aiogram.types import Message
 
 from bot.routes.base_func import update_state_tokens, send_message
 from bot.shared import ChatTypeFilter
@@ -15,7 +14,8 @@ router = Router(name=__name__)
 LOGIN = "user2"
 PASSWORD = "pass123"
 
-@router.message(ChatTypeFilter(chat_type=["group", "supergroup"]))
+@router.message(F.reply_to_message,
+                ChatTypeFilter(chat_type=["group", "supergroup"]))
 async def command_send_text(message: Message, state: FSMContext):
     data = await state.get_data()
     if data.get("access") is None:
@@ -37,8 +37,6 @@ async def command_send_text(message: Message, state: FSMContext):
     if message.text is None:
         return
     
-    if message.reply_to_message is None:
-        return
     answer_tg_id = message.reply_to_message.message_id
 
     response_data = send_message(

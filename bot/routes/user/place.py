@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, BotCommand
 
 from bot.states import LogInState
-from bot.keyboard.reply import UserRK, base_rk, auth_rk
+from bot.keyboard.reply import UserRK
 
 from core.requests import TokenController
 

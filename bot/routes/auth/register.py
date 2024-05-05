@@ -6,14 +6,13 @@ from aiogram.types import Message, BotCommand
 
 from bot.shared import ChatTypeFilter
 from bot.states import RegisterState, AuthState
-from bot.keyboard.reply import AuthRK, UserRK, AdminRK
-from bot.keyboard.reply import AuthRK
+from bot.keyboard.reply import AuthRK, UserRK
 
 from core.requests import TokenController
 
 router = Router(name=__name__)
 
-@router.message(F.text == UserRK.REG,
+@router.message(F.text == AuthRK.REG,
                 ChatTypeFilter(chat_type=["private"]))
 @router.message(ChatTypeFilter(chat_type=["private"]),
                 Command(BotCommand(command="register", description="Комманда регистрации")))

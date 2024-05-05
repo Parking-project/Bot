@@ -1,14 +1,13 @@
-import io
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, BotCommand
 
-from bot.states import LogInState, HelpState
-from bot.keyboard.reply import UserRK, auth_rk
+from bot.states import HelpState, AuthState
+from bot.keyboard.reply import UserRK
 from bot.routes.base_func import update_state_tokens, send_message
 
-from core.requests import MessageController, DocumentController
+from core.requests import DocumentController
 
 from config import TelegramConfig
 
@@ -16,8 +15,8 @@ router = Router(name=__name__)
 
 @router.message(HelpState.text, F.text == UserRK.REQUEST_HELP)
 @router.message(HelpState.documents, F.text == UserRK.REQUEST_HELP)
-@router.message(LogInState.auth, F.text == UserRK.REQUEST_HELP)
-@router.message(LogInState.auth, 
+@router.message(AuthState.user, F.text == UserRK.REQUEST_HELP)
+@router.message(AuthState.user, 
                 Command(BotCommand(command="send_help", description="register command")))
 async def command_send_message(message: Message, state: FSMContext):
     data = await update_state_tokens(
@@ -30,7 +29,7 @@ async def command_send_message(message: Message, state: FSMContext):
     
     await message.answer(
         "Введите текст сообщения и прикрепите файлы",
-        reply_markup=auth_rk()
+        reply_markup=UserRK.rk()
     )
 
 
@@ -64,24 +63,24 @@ async def command_send_text_photo(message: Message, state: FSMContext):
     if message.caption is None:
         await message.reply(
             text="Для отправки сообщения техподдержки необходимо ввести текст",
-            reply_markup=auth_rk()
+            reply_markup=UserRK.rk()
         )
         await update_state_tokens(
             message=message,
             state=state,
-            now_state=LogInState.auth
+            now_state=AuthState.user
         )
         return
     
     if F.photo and message.document is None:
         await message.reply(
             text="Для отправки фото не сжимайте их",
-            reply_markup=auth_rk()
+            reply_markup=UserRK.rk()
         )
         await update_state_tokens(
             message=message,
             state=state,
-            now_state=LogInState.auth
+            now_state=AuthState.user
         )
         return
         
@@ -98,12 +97,12 @@ async def command_send_text_photo(message: Message, state: FSMContext):
     if response_data.IsException():
         await message.reply(
             text=f"Не удалось отправить сообщение! {response_data.data}",
-            reply_markup=auth_rk()
+            reply_markup=UserRK.rk()
         )
         await update_state_tokens(
             message=message,
             state=state,
-            now_state=LogInState.auth
+            now_state=AuthState.user
         )
         return 
 
@@ -116,12 +115,12 @@ async def command_send_text_photo(message: Message, state: FSMContext):
     if response_data.IsException():
         await message.reply(
             text=f"Не удалось отправить файл! {response_data.data}",
-            reply_markup=auth_rk
+            reply_markup=UserRK.rk()
         )
         await update_state_tokens(
             message=message,
             state=state,
-            now_state=LogInState.auth
+            now_state=AuthState.user
         )
 
 @router.message(HelpState.text)
@@ -148,12 +147,12 @@ async def command_send_text(message: Message, state: FSMContext):
     if response_data.IsException():
         await message.reply(
             text=f"Не удалось отправить сообщение! {response_data.data}",
-            reply_markup=auth_rk()
+            reply_markup=UserRK.rk()
         )
         await update_state_tokens(
             message=message,
             state=state,
-            now_state=LogInState.auth
+            now_state=AuthState.user
         )
         return 
 
@@ -173,12 +172,12 @@ async def command_send_photo(message: Message, state: FSMContext):
     if F.photo and message.document is None:
         await message.reply(
             text="Для отправки фото не сжимайте их",
-            reply_markup=auth_rk()
+            reply_markup=UserRK.rk()
         )
         await update_state_tokens(
             message=message,
             state=state,
-            now_state=LogInState.auth
+            now_state=AuthState.user
         )
         return
     
@@ -192,10 +191,10 @@ async def command_send_photo(message: Message, state: FSMContext):
     if response_data.IsException():
         await message.reply(
             text=f"Не удалось отправить файл! {response_data.data}",
-            reply_markup=auth_rk
+            reply_markup=UserRK.rk()
         )
         await update_state_tokens(
             message=message,
             state=state,
-            now_state=LogInState.auth
+            now_state=AuthState.user
         )

@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, BotCommand
 
 from bot.shared import ChatTypeFilter
-from bot.states import LogInState, AuthState, HelpState
+from bot.states import LogInState, AuthState
 from bot.keyboard.reply import AuthRK, UserRK, AdminRK
 
 from core.requests import TokenController
