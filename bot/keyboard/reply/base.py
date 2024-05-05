@@ -5,7 +5,7 @@ class BaseRK:
     HELP = "Помощь"
 
     @classmethod
-    def reserve_rk():
+    def reserve_rk(cls):
         builder = ReplyKeyboardBuilder()
         builder.button(
             text=BaseRK.RESERVE
@@ -13,7 +13,7 @@ class BaseRK:
         return builder.as_markup(resize_keyboard=True)
     
     @classmethod
-    def help_rk():
+    def help_rk(cls):
         builder = ReplyKeyboardBuilder()
         builder.button(
             text=BaseRK.HELP

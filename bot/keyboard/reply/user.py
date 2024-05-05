@@ -6,7 +6,7 @@ class UserRK:
     EXIT = "Выход из аккаунта"
 
     @classmethod
-    def rk():
+    def rk(cls):
         builder = ReplyKeyboardBuilder()
         builder.button(
             text=UserRK.RESERVE_REQUEST

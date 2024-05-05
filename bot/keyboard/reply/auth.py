@@ -5,7 +5,7 @@ class AuthRK:
     REG = "Регистрация"
 
     @classmethod
-    def rk():
+    def rk(cls):
         builder = ReplyKeyboardBuilder()
         builder.button(
             text=AuthRK.AUTH

@@ -7,7 +7,7 @@ class AdminRK:
     EXIT = "Выход из аккаунта"
 
     @classmethod
-    def rk():
+    def rk(cls):
         builder = ReplyKeyboardBuilder()
         builder.button(
             text=AdminRK.RESERVE_HISTORY
