@@ -15,5 +15,4 @@ class AuthHistoryController:
 
         if response_json.get("data") is None:
             return ApiResponse(response_json["message"], True)
-        auth_list = [AuthHistory(**k) for k in response_json["data"]]
-        return ApiResponse(auth_list)
+        return ApiResponse(response_json["data"])

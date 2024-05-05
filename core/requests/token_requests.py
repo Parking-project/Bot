@@ -14,7 +14,7 @@ class TokenController:
         ).json()
         if response_json.get("tokens") is None:
             return ApiResponse(response_json["message"], True)
-        return ApiResponse(response_json["tokens"])
+        return ApiResponse(response_json)
     
     @classmethod
     def register(cls, login: str, password: str, display_name: str):

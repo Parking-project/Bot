@@ -1,19 +1,25 @@
 from .base_requests import send_post_request
-from core.domain.entity import Message, ApiResponse
+from core.domain.entity import ApiResponse
 
 class DocumentController:
     @classmethod
-    def post(cls, page_index, token):
+    def post(cls, file_id: str,
+             file_unique_id: str, file_size: int,
+             file_url: str, file_mime: str, token: str):
+        
         response_json = send_post_request(
-            "/message/post",
+            "/document/post",
             json={
-                "page_index": page_index,
-                "page_size": 10
+                "document_file_id": file_id,
+                "document_file_unique_id": file_unique_id,
+                "document_file_size": file_size,
+                "document_file_url": file_url,
+                "document_file_mime": file_mime
             },
             token=token
         ).json()
 
         if response_json.get("data") is None:
+            print("\n\n\n", response_json["message"], "\n\n\n")
             return ApiResponse(response_json["message"], True)
-        message_data = Message(**response_json["data"])
-        return ApiResponse(message_data)
+        return ApiResponse(response_json["data"])
