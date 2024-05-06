@@ -10,16 +10,16 @@ class AdminRK:
     def rk(cls):
         builder = ReplyKeyboardBuilder()
         builder.button(
-            text=AdminRK.RESERVE_HISTORY
+            text=cls.RESERVE_HISTORY
         )
         builder.button(
-            text=AdminRK.AUTH_HISTORY
+            text=cls.AUTH_HISTORY
         )
         builder.button(
-            text=AdminRK.TOKEN_HISTORY
+            text=cls.TOKEN_HISTORY
         )
         builder.button(
-            text=AdminRK.EXIT
+            text=cls.EXIT
         )
         builder.adjust(1)
         return builder.as_markup(resize_keyboard=True)

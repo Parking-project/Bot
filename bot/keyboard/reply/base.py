@@ -10,6 +10,7 @@ class BaseRK:
         builder.button(
             text=BaseRK.RESERVE
         )
+        builder.adjust(1)
         return builder.as_markup(resize_keyboard=True)
     
     @classmethod
@@ -18,4 +19,5 @@ class BaseRK:
         builder.button(
             text=BaseRK.HELP
         )
+        builder.adjust(1)
         return builder.as_markup(resize_keyboard=True)

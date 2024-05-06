@@ -2,7 +2,7 @@ __all__ = (
     "AdminRK",
     "AuthRK",
     "BaseRK",
-    "UserRK"
+    "UserRK",
 )
 
 from .admin import AdminRK

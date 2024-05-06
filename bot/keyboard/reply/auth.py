@@ -3,14 +3,20 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 class AuthRK:
     AUTH = "Авторизация"
     REG = "Регистрация"
+    END = "Завершить"
 
     @classmethod
-    def rk(cls):
+    def rk(cls, in_proccess: bool):
         builder = ReplyKeyboardBuilder()
         builder.button(
-            text=AuthRK.AUTH
+            text=cls.AUTH
         )
         builder.button(
-            text=AuthRK.REG
+            text=cls.REG
         )
+        if in_proccess:
+            builder.button(
+                text=cls.END
+            )
+        builder.adjust(1)
         return builder.as_markup(resize_keyboard=True)
