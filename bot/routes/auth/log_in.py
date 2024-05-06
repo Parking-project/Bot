@@ -14,8 +14,8 @@ router = Router(name=__name__)
 
 @router.message(F.text == AuthRK.AUTH,
                 ChatTypeFilter(chat_type=["private"]))
-@router.message(ChatTypeFilter(chat_type=["private"]),
-                Command(BotCommand(command="login", description="Комманда авторизации")))
+@router.message(Command(BotCommand(command="login", description="Комманда авторизации")),
+                ChatTypeFilter(chat_type=["private"]))
 async def command_login(message: Message, state: FSMContext):
     await state.clear()
     await state.set_state(LogInState.login)

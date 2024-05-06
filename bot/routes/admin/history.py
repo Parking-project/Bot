@@ -15,16 +15,15 @@ from bot.keyboard.inline.admin_history import (
 
 from core.requests import AuthHistoryController, ReserveHistoryController, TokenBlocListController
 
-from ..base_func import update_state_tokens
+from ..base_func import update_state
 from .base_func import auth_history_print, reserve_history_print, token_bloclist_print
 
 router = Router(name=__name__)
 
-
 @router.message(AuthState.admin, 
                 Command(BotCommand(command="auth_history", description="auth command")))
 async def command_auth_hostory(message: Message, state: FSMContext):
-    data = await update_state_tokens(
+    data = await update_state(
         message=message,
         state=state,
         now_state=AuthState.admin
@@ -47,7 +46,7 @@ async def command_auth_hostory(message: Message, state: FSMContext):
 @router.message(AuthState.admin, 
                 Command(BotCommand(command="reserve_history", description="auth command")))
 async def command_reserve_hostory(message: Message, state: FSMContext):
-    data = await update_state_tokens(
+    data = await update_state(
         message=message,
         state=state,
         now_state=AuthState.admin
@@ -70,7 +69,7 @@ async def command_reserve_hostory(message: Message, state: FSMContext):
 @router.message(AuthState.admin, 
                 Command(BotCommand(command="token_bloclist", description="auth command")))
 async def command_reserve_hostory(message: Message, state: FSMContext):
-    data = await update_state_tokens(
+    data = await update_state(
         message=message,
         state=state,
         now_state=AuthState.admin

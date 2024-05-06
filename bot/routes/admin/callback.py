@@ -3,7 +3,7 @@ from aiogram.types import CallbackQuery
 from aiogram import Router
 
 from bot.states import AuthState
-from bot.routes.base_func import update_state_tokens
+from bot.routes.base_func import update_state
 from bot.keyboard.inline.admin_history import (
     AuthHistoryCallback,
     auth_history_action,
@@ -25,7 +25,7 @@ async def page_change_auth(
     callback_data: AuthHistoryCallback,
     state: FSMContext
 ):
-    data = await update_state_tokens(
+    data = await update_state(
         message=callback_query.message,
         state=state,
         now_state=AuthState.admin
@@ -55,7 +55,7 @@ async def page_change_reserve(
     callback_data: ReserveHistoryCallback,
     state: FSMContext
 ):
-    data = await update_state_tokens(
+    data = await update_state(
         message=callback_query.message,
         state=state,
         now_state=AuthState.admin
@@ -83,7 +83,7 @@ async def page_change_token(
     callback_data: ReserveHistoryCallback,
     state: FSMContext
 ):
-    data = await update_state_tokens(
+    data = await update_state(
         message=callback_query.message,
         state=state,
         now_state=AuthState.admin
