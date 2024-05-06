@@ -3,9 +3,9 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, BotCommand
 
-from bot.states import HelpState, AuthState
+from bot.states import HelpState, AuthState, ReserveState
 from bot.keyboard.reply import UserRK
-from bot.routes.base_func import update_state_tokens, send_message
+from bot.routes.base_func import update_state, send_message
 
 from core.requests import DocumentController
 
@@ -13,13 +13,24 @@ from config import TelegramConfig
 
 router = Router(name=__name__)
 
-@router.message(HelpState.text, F.text == UserRK.REQUEST_HELP)
-@router.message(HelpState.documents, F.text == UserRK.REQUEST_HELP)
 @router.message(AuthState.user, F.text == UserRK.REQUEST_HELP)
-@router.message(AuthState.user, 
-                Command(BotCommand(command="send_help", description="register command")))
+@router.message(HelpState.text, F.text == UserRK.REQUEST_HELP)
+@router.message(ReserveState.add, F.text == UserRK.REQUEST_HELP)
+@router.message(ReserveState.delete, F.text == UserRK.REQUEST_HELP)
+@router.message(HelpState.documents, F.text == UserRK.REQUEST_HELP)
+@router.message(ReserveState.get_free, F.text == UserRK.REQUEST_HELP)
+@router.message(ReserveState.set_place_place, F.text == UserRK.REQUEST_HELP)
+@router.message(ReserveState.set_place_reserve, F.text == UserRK.REQUEST_HELP)
+@router.message(AuthState.user, Command(BotCommand(command="send_help", description="register command")))
+@router.message(HelpState.text, Command(BotCommand(command="send_help", description="register command")))
+@router.message(ReserveState.add, Command(BotCommand(command="send_help", description="register command")))
+@router.message(ReserveState.delete, Command(BotCommand(command="send_help", description="register command")))
+@router.message(HelpState.documents, Command(BotCommand(command="send_help", description="register command")))
+@router.message(ReserveState.get_free, Command(BotCommand(command="send_help", description="register command")))
+@router.message(ReserveState.set_place_place, Command(BotCommand(command="send_help", description="register command")))
+@router.message(ReserveState.set_place_reserve, Command(BotCommand(command="send_help", description="register command")))
 async def command_send_message(message: Message, state: FSMContext):
-    data = await update_state_tokens(
+    data = await update_state(
         message=message,
         state=state,
         now_state=HelpState.text
@@ -50,8 +61,8 @@ async def send_document(access: str, message: Message, mime: str):
 
 @router.message(HelpState.text, F.photo)
 @router.message(HelpState.text, F.document)
-async def command_send_text_photo(message: Message, state: FSMContext):
-    data = await update_state_tokens(
+async def command_send_document(message: Message, state: FSMContext):
+    data = await update_state(
         message=message,
         state=state,
         now_state=HelpState.documents
@@ -65,24 +76,27 @@ async def command_send_text_photo(message: Message, state: FSMContext):
             text="Для отправки сообщения техподдержки необходимо ввести текст",
             reply_markup=UserRK.rk()
         )
-        await update_state_tokens(
+        await update_state(
             message=message,
             state=state,
             now_state=AuthState.user
         )
         return
     
-    if F.photo and message.document is None:
-        await message.reply(
-            text="Для отправки фото не сжимайте их",
-            reply_markup=UserRK.rk()
-        )
-        await update_state_tokens(
-            message=message,
-            state=state,
-            now_state=AuthState.user
-        )
-        return
+    mime = "document"
+    if F.photo:
+        mime = "photo"
+        if message.document is None:
+            await message.reply(
+                text="Для отправки фото не сжимайте их",
+                reply_markup=UserRK.rk()
+            )
+            await update_state(
+                message=message,
+                state=state,
+                now_state=AuthState.user
+            )
+            return
         
     answer_tg_id = None
     if message.reply_to_message is not None:
@@ -99,7 +113,7 @@ async def command_send_text_photo(message: Message, state: FSMContext):
             text=f"Не удалось отправить сообщение! {response_data.data}",
             reply_markup=UserRK.rk()
         )
-        await update_state_tokens(
+        await update_state(
             message=message,
             state=state,
             now_state=AuthState.user
@@ -109,7 +123,7 @@ async def command_send_text_photo(message: Message, state: FSMContext):
     response_data = await send_document(
         access=access,
         message=message, 
-        mime=(F.photo if "photo" else "document")
+        mime=mime
     )
 
     if response_data.IsException():
@@ -117,7 +131,7 @@ async def command_send_text_photo(message: Message, state: FSMContext):
             text=f"Не удалось отправить файл! {response_data.data}",
             reply_markup=UserRK.rk()
         )
-        await update_state_tokens(
+        await update_state(
             message=message,
             state=state,
             now_state=AuthState.user
@@ -125,7 +139,7 @@ async def command_send_text_photo(message: Message, state: FSMContext):
 
 @router.message(HelpState.text)
 async def command_send_text(message: Message, state: FSMContext):
-    data = await update_state_tokens(
+    data = await update_state(
         message=message,
         state=state,
         now_state=HelpState.documents
@@ -135,7 +149,8 @@ async def command_send_text(message: Message, state: FSMContext):
     access = data["access"]
     
     answer_tg_id = None
-    if message.reply_to_message:
+    if message.reply_to_message is not None:
+        print("\n\n\n", message.reply_to_message.message_id, "\n\n\n")
         answer_tg_id = message.reply_to_message.message_id
 
     response_data = send_message(
@@ -149,7 +164,7 @@ async def command_send_text(message: Message, state: FSMContext):
             text=f"Не удалось отправить сообщение! {response_data.data}",
             reply_markup=UserRK.rk()
         )
-        await update_state_tokens(
+        await update_state(
             message=message,
             state=state,
             now_state=AuthState.user
@@ -160,7 +175,7 @@ async def command_send_text(message: Message, state: FSMContext):
 @router.message(HelpState.documents, F.photo)
 @router.message(HelpState.documents, F.document)
 async def command_send_photo(message: Message, state: FSMContext):
-    data = await update_state_tokens(
+    data = await update_state(
         message=message,
         state=state,
         now_state=HelpState.documents
@@ -169,23 +184,26 @@ async def command_send_photo(message: Message, state: FSMContext):
         return
     access = data["access"]
 
-    if F.photo and message.document is None:
-        await message.reply(
-            text="Для отправки фото не сжимайте их",
-            reply_markup=UserRK.rk()
-        )
-        await update_state_tokens(
-            message=message,
-            state=state,
-            now_state=AuthState.user
-        )
-        return
+    mime = "document"
+    if F.photo:
+        mime = "photo"
+        if message.document is None:
+            await message.reply(
+                text="Для отправки фото не сжимайте их",
+                reply_markup=UserRK.rk()
+            )
+            await update_state(
+                message=message,
+                state=state,
+                now_state=AuthState.user
+            )
+            return
     
     
     response_data = await send_document(
         access=access,
         message=message,
-        mime="photo"
+        mime=mime
     )
 
     if response_data.IsException():
@@ -193,7 +211,7 @@ async def command_send_photo(message: Message, state: FSMContext):
             text=f"Не удалось отправить файл! {response_data.data}",
             reply_markup=UserRK.rk()
         )
-        await update_state_tokens(
+        await update_state(
             message=message,
             state=state,
             now_state=AuthState.user
