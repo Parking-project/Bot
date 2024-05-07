@@ -2,6 +2,8 @@ from .base_requests import send_post_request
 from core.domain.entity import Message, ApiResponse
 
 class MessageController:
+    CONTROLLER = "/message"
+
     CHAT_ID = "chat_id"
     MESSAGE_BOT_ID = "message_bot_id"
     MESSAGE_ID = "message_id"
@@ -9,7 +11,7 @@ class MessageController:
     @classmethod
     def post(cls, text, group_id, message_id, answer_tg_id, token):
         response_json = send_post_request(
-            "/message/post",
+            cls.CONTROLLER + "/post",
             json={
                 "text": text,
                 cls.CHAT_ID: group_id,
@@ -21,5 +23,4 @@ class MessageController:
 
         if response_json.get("data") is None:
             return ApiResponse(response_json["message"], True)
-        # message_data = Message(**response_json["data"])
-        return ApiResponse(response_json)
+        return ApiResponse(response_json["data"])

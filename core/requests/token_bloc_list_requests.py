@@ -2,10 +2,12 @@ from .base_requests import send_get_request
 from core.domain.entity import TokenBlocList, ApiResponse
 
 class TokenBlocListController:
+    CONTROLLER = "/token_bloc_list"
+    
     @classmethod
     def get(cls, page_index, token):
         response_json = send_get_request(
-            "/token_bloc_list/get",
+            cls.CONTROLLER + "/get",
             json={
                 "page_index": page_index,
                 "page_size": 10

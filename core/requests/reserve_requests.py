@@ -1,4 +1,62 @@
-from .base_requests import send_get_request, send_post_request
+from .base_requests import send_get_request, send_post_request, send_put_request
+from core.domain.entity import Reserve, ApiResponse
 
 class ReserveController:
-    pass
+    CONTROLLER = "/reserve"
+
+    @classmethod
+    def get_state(cls, state, page_index: int, token: str):
+        response_json = send_get_request(
+            cls.CONTROLLER + "/get_state",
+            json={
+                "reserve_state": state,
+                "page_index": page_index,
+                "page_size": 10
+            },
+            token=token
+        ).json()
+        if response_json.get("data") is None:
+            return ApiResponse(response_json["message"], True)
+        reserve_list = [Reserve(**k) for k in response_json["data"]]
+        return ApiResponse(reserve_list)
+    
+    @classmethod
+    def post(cls, chat_id: int, message_id: int, hours: float, token):
+        response_json = send_post_request(
+            cls.CONTROLLER + "/post_hour",
+            json={
+                "hours": hours,
+                "chat_id": chat_id,
+                "message_id": message_id
+            },
+            token=token
+        ).json()
+        if response_json.get("data") is None:
+            return ApiResponse(response_json["message"], True)
+        return ApiResponse(response_json["data"])
+
+    @classmethod
+    def approve(cls, reserve_id: str, token: str):
+        response_json = send_post_request(
+            cls.CONTROLLER + "/approve",
+            json={
+                "reserve_id": reserve_id
+            },
+            token=token
+        ).json()
+        if response_json.get("data") is None:
+            return ApiResponse(response_json["message"], True)
+        return ApiResponse(response_json["data"])
+    
+    @classmethod
+    def delete(cls, reserve_id: str, token: str):
+        response_json = send_post_request(
+            cls.CONTROLLER + "/delete",
+            json={
+                "reserve_id": f"{reserve_id}"
+            },
+            token=token
+        ).json()
+        if response_json.get("data") is None:
+            return ApiResponse(response_json["message"], True)
+        return ApiResponse(response_json["data"])

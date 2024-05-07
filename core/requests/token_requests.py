@@ -3,10 +3,12 @@ from core.domain.entity import ApiResponse
 from aiogram.fsm.context import FSMContext
 
 class TokenController:
+    CONTROLLER = "/token"
+    
     @classmethod
     def login(cls, login: str, password: str):
         response_json = send_post_request(
-            "/token/login",
+            cls.CONTROLLER + "/login",
             json={
                 "login": login,
                 "password": password
@@ -19,7 +21,7 @@ class TokenController:
     @classmethod
     def register(cls, login: str, password: str, display_name: str):
         response_json = send_post_request(
-            "/token/register",
+            cls.CONTROLLER + "/register",
             json={
                 "login": login,
                 "password": password,
@@ -28,12 +30,12 @@ class TokenController:
         ).json()
         if response_json.get("tokens") is None:
             return ApiResponse(response_json["message"], True)
-        return ApiResponse(response_json["tokens"])
+        return ApiResponse(response_json)
         
     @classmethod
     def check(cls, access, refresh):
         response = send_get_request(
-            "/token/check",
+            cls.CONTROLLER + "/check",
             json={},
             token=access
         )
@@ -61,8 +63,11 @@ class TokenController:
     
     @classmethod
     def logout(cls, token):
-        send_get_request(
-            "/token/logout",
+        response_json = send_get_request(
+            cls.CONTROLLER + "/logout",
             json={},
             token=token
-        )
+        ).json()
+        if response_json.get("data") is None:
+            return ApiResponse(response_json["message"], True)
+        return ApiResponse(response_json)

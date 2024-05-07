@@ -2,10 +2,12 @@ from .base_requests import send_get_request
 from core.domain.entity import Place, ApiResponse
 
 class PlaceController:
+    CONTROLLER = "/place"
+    
     @classmethod
     def get_prefix(cls, prefix, page_index, token):
         response_json = send_get_request(
-            "/place/get_prefix",
+            cls.CONTROLLER + "/get_prefix",
             json={
                 "place_prefix": prefix,
                 "page_index": page_index,
@@ -21,7 +23,7 @@ class PlaceController:
     @classmethod
     def get_code(cls, place_code, token):
         response_json = send_get_request(
-            "/place/get_code",
+            cls.CONTROLLER + "/get_code",
             json={
                 "place_code": place_code
             },
@@ -35,7 +37,7 @@ class PlaceController:
     @classmethod
     def get_code(cls, hours, token):
         response_json = send_get_request(
-            "/place/get_free",
+            cls.CONTROLLER + "/get_free",
             json={
                 "hours": hours
             },

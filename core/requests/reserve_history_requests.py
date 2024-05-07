@@ -2,10 +2,12 @@ from .base_requests import send_get_request
 from core.domain.entity import ReserveHistory, ApiResponse
 
 class ReserveHistoryController:
+    CONTROLLER = "/reserve_history"
+    
     @classmethod
     def get(cls, page_index, token):
         response_json = send_get_request(
-            "/reserve_history/get",
+            cls.CONTROLLER + "/get",
             json={
                 "page_index": page_index,
                 "page_size": 10
