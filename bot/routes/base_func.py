@@ -5,11 +5,11 @@ from core.domain.entity import ApiResponse
 
 def send_message(access: str, text: str, message: Message, answer_tg_id: int):
     return MessageController.post(
-        token=access,
         text=text,
         group_id=message.chat.id,
         message_id=message.message_id,
-        answer_tg_id=answer_tg_id
+        answer_tg_id=answer_tg_id,
+        token=access
     )
 
 async def update_state(message: Message, state: FSMContext, now_state, **kwargs) -> dict[str]:
