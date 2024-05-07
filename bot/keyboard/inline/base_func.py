@@ -1,17 +1,32 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-def build_paginator_action(cls, page_index):
+class Inline:
+    @classmethod
+    def create(cls, **kwargs):
+        pass
+    
+    @classmethod
+    def build(cls, page_index=0):
+        pass
+    
+    @classmethod
+    def print(cls, list: list, page_index=0):
+        pass
+
+    
+def build_paginator_action(cls: Inline, page_index: int, **kwargs):
     builder = InlineKeyboardBuilder()
-    def create_button(text, page_index):
+    def create_button(text, page_index: int):
         builder.button(
             text=text,
-            callback_data=cls(page_index=page_index).pack(),
+            callback_data=cls.create(
+                page_index=page_index,
+                **kwargs
+            ).pack(),
         )
-    
     if page_index != 0:
         create_button(text="<<", page_index=page_index-1)
         create_button(text="Вернуться", page_index=0)
     create_button(text=">>", page_index=page_index+1)
-    builder.adjust(3)
 
-    return builder.as_markup(resize_keyboard=True)
+    return builder
