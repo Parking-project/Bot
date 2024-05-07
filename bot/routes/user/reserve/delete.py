@@ -41,7 +41,7 @@ async def command_delete(message: Message, state: FSMContext):
     # Вывести список доступных для удаления бронирований
 
     message.answer(
-        text="Введите номер брони",
+        text="Введите номер бронирования",
         reply_markup=UserRK.rk()
     )
 

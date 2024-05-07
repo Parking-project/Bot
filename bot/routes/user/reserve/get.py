@@ -5,9 +5,10 @@ from aiogram.types import Message, BotCommand
 
 from bot.states import HelpState, AuthState, ReserveState
 from bot.keyboard.reply import UserRK
+from bot.keyboard.inline import InlineReserve, InlinePlace
 from bot.routes.base_func import update_state, send_message
 
-from core.requests import DocumentController
+from core.requests import ReserveController
 
 from config import TelegramConfig
 
@@ -38,6 +39,19 @@ async def command_get_reserve(message: Message, state: FSMContext):
     if data is None:
         return
     access = data["access"]
+    
+    await message.answer(
+        text=InlineReserve.print(
+            list=ReserveController.get_state(
+                state=InlineReserve.GetReserveAction.sended,
+                page_index=0,
+                token=access
+            ).data,
+            page_index=0
+        ),
+        reply_markup=InlineReserve.build()
+    )
+
 
 @router.message(AuthState.user, F.text == UserRK.GET_FREE_PLACE)
 @router.message(HelpState.text, F.text == UserRK.GET_FREE_PLACE)

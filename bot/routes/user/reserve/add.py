@@ -5,9 +5,12 @@ from aiogram.types import Message, BotCommand
 
 from bot.states import HelpState, AuthState, ReserveState
 from bot.keyboard.reply import UserRK
-from bot.routes.base_func import update_state, send_message
+from bot.routes.base_func import update_state
 
-from core.requests import DocumentController
+from bot.keyboard.inline import InlineUserReserve
+
+from core.requests import ReserveController
+from core.domain.entity import ApiResponse
 
 from config import TelegramConfig
 
@@ -38,13 +41,13 @@ async def command_add(message: Message, state: FSMContext):
     if data is None:
         return
     
-    message.answer(
+    await message.answer(
         text="Введите длительность бронирования в часах",
         reply_markup=UserRK.rk()
     )
 
 @router.message(ReserveState.add)
-async def command_add_id(message: Message, state: FSMContext):
+async def command_add_hours(message: Message, state: FSMContext):
     data = await update_state(
         message=message,
         state=state,
@@ -53,3 +56,34 @@ async def command_add_id(message: Message, state: FSMContext):
     if data is None:
         return
     access = data["access"]
+    
+    hours: float = None
+    try:
+        hours = int(message.text)
+    except:
+        await message.reply(
+            text="Необходимо ввести длительность в виде одного только числа"
+        )
+        return
+    message = await message.answer(
+        text="***Отправка заявки***",
+    )
+    response: ApiResponse = ReserveController.post(
+        chat_id=message.chat.id,
+        message_id=message.message_id,
+        hours=hours,
+        token=access
+    )
+    if response.IsException():
+        await message.edit_text(
+            text="Отправка заявки провалилась",
+            reply_markup=None
+        )
+    else:
+        await message.edit_text(
+            text="Заявка отправлена",
+            reply_markup=InlineUserReserve.build(
+                message_id=response.data["message_id"],
+                reserve_id=response.data["reserve_id"]
+            )
+        )
