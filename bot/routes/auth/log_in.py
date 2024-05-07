@@ -21,7 +21,7 @@ async def command_login(message: Message, state: FSMContext):
     await state.set_state(LogInState.login)
     await message.answer(
         "Введите логин",
-        reply_markup=AuthRK.rk()
+        reply_markup=AuthRK.rk(True)
     )
 
 @router.message(LogInState.login)
@@ -33,7 +33,7 @@ async def command_login_login(message: Message, state: FSMContext):
     await state.set_state(LogInState.password)
     await message.answer(
         "Введите пароль",
-        reply_markup=AuthRK.rk()
+        reply_markup=AuthRK.rk(True)
     )
 
 @router.message(LogInState.password)
@@ -42,7 +42,7 @@ async def command_login_password(message: Message, state: FSMContext):
     await state.clear()
     response = TokenController.login(data["login"], message.text)
     if response.IsException():
-        error = response.data["message"]
+        error = response.data
         await message.answer(
             f"<b>Авторизация провалилась</b>\n\n{error}",
             reply_markup=AuthRK.rk()

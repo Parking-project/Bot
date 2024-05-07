@@ -9,7 +9,7 @@ from .register import router as callback_router
 router = Router(name=__name__)
 
 router.include_routers(
+    exit_router,
     auth_router,
     callback_router,
-    exit_router,
 )

@@ -21,7 +21,7 @@ async def command_register(message: Message, state: FSMContext):
     await state.set_state(RegisterState.login)
     await message.answer(
         "Введите логин",
-        reply_markup=AuthRK.rk()
+        reply_markup=AuthRK.rk(True)
     )
 
 @router.message(RegisterState.login)
@@ -33,7 +33,7 @@ async def command_register_login(message: Message, state: FSMContext):
     await state.set_state(RegisterState.password)
     await message.answer(
         "Введите пароль",
-        reply_markup=AuthRK.rk()
+        reply_markup=AuthRK.rk(True)
     )
 
 @router.message(RegisterState.password)
@@ -47,7 +47,7 @@ async def command_register_password(message: Message, state: FSMContext):
     await state.set_state(RegisterState.display_name)
     await message.answer(
         "Введите отображающее имя",
-        reply_markup=AuthRK.rk()
+        reply_markup=AuthRK.rk(True)
     )
 
 @router.message(RegisterState.display_name)
