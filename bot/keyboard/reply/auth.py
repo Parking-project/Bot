@@ -6,7 +6,7 @@ class AuthRK:
     END = "Завершить"
 
     @classmethod
-    def rk(cls, in_proccess: bool):
+    def rk(cls, in_proccess: bool = False):
         builder = ReplyKeyboardBuilder()
         builder.button(
             text=cls.AUTH
