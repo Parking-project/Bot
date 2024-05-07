@@ -4,25 +4,21 @@ from aiogram import Router
 
 from bot.states import AuthState
 from bot.routes.base_func import update_state
-from bot.keyboard.inline.admin_history import (
-    AuthHistoryCallback,
-    auth_history_action,
-    ReserveHistoryCallback,
-    reserve_history_action,
-    TokenBlocListCallback,
-    token_bloclist_action
+from bot.keyboard.inline import (
+    InlineAuthHistory,
+    InlineReserveHistory,
+    InlineTokenBlocList
 )
 from core.requests import AuthHistoryController, ReserveHistoryController, TokenBlocListController
-from .base_func import auth_history_print, reserve_history_print, token_bloclist_print
 
 router = Router(name=__name__)
 
 # region history
 @router.callback_query(AuthState.admin,
-                       AuthHistoryCallback.filter())
+                       InlineAuthHistory.Callback.filter())
 async def page_change_auth( 
     callback_query: CallbackQuery,
-    callback_data: AuthHistoryCallback,
+    callback_data: InlineAuthHistory.Callback,
     state: FSMContext
 ):
     data = await update_state(
@@ -41,18 +37,18 @@ async def page_change_auth(
     ).data
 
     await callback_query.message.edit_text(
-        text=auth_history_print(
+        text=InlineAuthHistory.print(
             auth_data, 
             page_index=callback_data.page_index
         ),
-        reply_markup=auth_history_action(callback_data.page_index)
+        reply_markup=InlineAuthHistory.build(callback_data.page_index)
     )
 
 @router.callback_query(AuthState.admin,
-                       ReserveHistoryCallback.filter())
+                       InlineReserveHistory.Callback.filter())
 async def page_change_reserve(
     callback_query: CallbackQuery,
-    callback_data: ReserveHistoryCallback,
+    callback_data: InlineReserveHistory.Callback,
     state: FSMContext
 ):
     data = await update_state(
@@ -66,21 +62,21 @@ async def page_change_reserve(
     access = data["access"]
     
     await callback_query.message.edit_text(
-        text=reserve_history_print(
+        text=InlineReserveHistory.print(
             ReserveHistoryController.get(
                 token=access, 
                 page_index=callback_data.page_index
             ).data, 
             page_index=callback_data.page_index
         ),
-        reply_markup=reserve_history_action(callback_data.page_index)
+        reply_markup=InlineReserveHistory.build(callback_data.page_index)
     )
 
 @router.callback_query(AuthState.admin,
-                       TokenBlocListCallback.filter())
+                       InlineTokenBlocList.Callback.filter())
 async def page_change_token(
     callback_query: CallbackQuery,
-    callback_data: ReserveHistoryCallback,
+    callback_data: InlineTokenBlocList.Callback,
     state: FSMContext
 ):
     data = await update_state(
@@ -94,30 +90,30 @@ async def page_change_token(
     access = data["access"]
     
     await callback_query.message.edit_text(
-        text=token_bloclist_print(
+        text=InlineTokenBlocList.print(
             TokenBlocListController.get(
                 token=access, 
                 page_index=callback_data.page_index
             ).data, 
             page_index=callback_data.page_index
         ),
-        reply_markup=token_bloclist_action(callback_data.page_index)
+        reply_markup=InlineTokenBlocList.build(callback_data.page_index)
     )
 
 
-@router.callback_query(AuthHistoryCallback.filter())
+@router.callback_query(InlineAuthHistory.Callback.filter())
 async def auth_history_message_delete(
     callback_query: CallbackQuery
 ):
     await callback_query.message.delete()
 
-@router.callback_query(ReserveHistoryCallback.filter())
+@router.callback_query(InlineReserveHistory.Callback.filter())
 async def reserve_history_message_delete(
     callback_query: CallbackQuery
 ):
     await callback_query.message.delete()
 
-@router.callback_query(ReserveHistoryCallback.filter())
+@router.callback_query(InlineTokenBlocList.Callback.filter())
 async def token_history_message_delete(
     callback_query: CallbackQuery
 ):
