@@ -3,7 +3,8 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 class UserRK:    
     REQUEST_HELP = "Отправка сообщения техподдержке"
     
-    GET = "Получить заявки"
+    GET_RESERVE = "Получить  заявки"
+    GET_HISTORY_RESERVE = "Получить историю заявок"
     GET_FREE_PLACE = "Свободные места"
     ADD_RESERVE = "Добавить"
     DELETE_RESERVE = "Удалить"
@@ -15,7 +16,10 @@ class UserRK:
     def rk(cls):
         builder = ReplyKeyboardBuilder()
         builder.button(
-            text=cls.GET
+            text=cls.GET_RESERVE
+        )
+        builder.button(
+            text=cls.GET_HISTORY_RESERVE
         )
         builder.button(
             text=cls.GET_FREE_PLACE

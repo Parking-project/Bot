@@ -150,7 +150,6 @@ async def command_send_text(message: Message, state: FSMContext):
     
     answer_tg_id = None
     if message.reply_to_message is not None:
-        print("\n\n\n", message.reply_to_message.message_id, "\n\n\n")
         answer_tg_id = message.reply_to_message.message_id
 
     response_data = send_message(

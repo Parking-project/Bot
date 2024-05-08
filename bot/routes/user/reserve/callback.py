@@ -8,7 +8,8 @@ from bot.routes.base_func import update_state
 
 from bot.keyboard.inline import (
     InlineReserve,
-    InlineUserReserve
+    InlineUserReserve,
+    InlineProcessReserve
 )
 from core.requests import ReserveController
 
@@ -17,15 +18,16 @@ from config import TelegramConfig
 router = Router(name=__name__)
 
 @router.callback_query(InlineUserReserve.Callback.filter())
-async def page_change_auth( 
+async def user_reserve_action( 
     callback_query: CallbackQuery,
     callback_data: InlineUserReserve.Callback,
     state: FSMContext
 ):
+    now_state = await state.get_state()
     data = await update_state(
         message=callback_query.message,
         state=state,
-        now_state=AuthState.user
+        now_state=now_state
     )
     if data is None:
         return
@@ -50,44 +52,70 @@ async def page_change_auth(
     )
     await callback_query.answer()
 
-
 @router.callback_query(InlineReserve.Callback.filter())
 async def page_change_reserve( 
     callback_query: CallbackQuery,
     callback_data: InlineReserve.Callback,
     state: FSMContext
 ):
+    now_state = await state.get_state()
     data = await update_state(
         message=callback_query.message,
         state=state,
-        now_state=AuthState.user
+        now_state=now_state
     )
     if data is None:
         return
     access = data["access"]
 
+    list = ReserveController.get_state(
+        state=callback_data.action,
+        is_actual=callback_data.is_actual,
+        page_index=callback_data.page_index,
+        token=access
+    ).data
+
     await callback_query.message.edit_text(
         text=InlineReserve.print(
-                list=ReserveController.get_state(
-                state=callback_data.action,
-                page_index=callback_data.page_index,
-                token=access
-            ).data,
+            list=list,
+            is_actual=callback_data.is_actual,
             state=callback_data.action,
             page_index=callback_data.page_index
         ),
-        reply_markup=InlineReserve.build()
+        reply_markup=InlineReserve.build(
+            is_actual=callback_data.is_actual,
+            state=callback_data.action,
+            page_index=callback_data.page_index
+        )
     )
-    await callback_query.answer()
 
-    
-@router.callback_query()
+@router.callback_query(InlineProcessReserve.Callback.filter())
 async def page_change_reserve( 
     callback_query: CallbackQuery,
+    callback_data: InlineProcessReserve.Callback,
     state: FSMContext
 ):
-    await callback_query.message.reply(
-        text = callback_query.data
+    now_state = await state.get_state()
+    data = await update_state(
+        message=callback_query.message,
+        state=state,
+        now_state=now_state
     )
+    if data is None:
+        return
+    access = data["access"]
 
-    await callback_query.answer()
+    list = ReserveController.get_process(
+        page_index=callback_data.page_index,
+        token=access
+    ).data
+    
+    await callback_query.message.edit_text(
+        text=InlineProcessReserve.print(
+            list=list,
+            page_index=callback_data.page_index,
+        ),
+        reply_markup=InlineProcessReserve.build(
+            page_index=callback_data.page_index
+        )
+    )

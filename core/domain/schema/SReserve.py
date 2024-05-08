@@ -1,5 +1,5 @@
 from marshmallow import fields
 import SPage
 
-class SPlace(SPage):
+class SReserve(SPage):
     pass

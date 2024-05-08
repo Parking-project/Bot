@@ -5,7 +5,9 @@ __all__ = (
     "ReserveAction",
     "InlineBotReserve",
     "InlineUserReserve",
+    "GetReserveAction",
     "InlineReserve",
+    "InlineProcessReserve",
     "InlinePlace"
 )
 
@@ -20,6 +22,8 @@ from .request_reserve import (
     InlineUserReserve
 )
 from .reserve import (
+    GetReserveAction,
     InlineReserve,
+    InlineProcessReserve,
     InlinePlace
 )

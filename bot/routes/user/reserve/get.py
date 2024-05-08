@@ -5,7 +5,7 @@ from aiogram.types import Message, BotCommand
 
 from bot.states import HelpState, AuthState, ReserveState
 from bot.keyboard.reply import UserRK
-from bot.keyboard.inline import InlineReserve, InlinePlace
+from bot.keyboard.inline import GetReserveAction, InlineReserve, InlinePlace
 from bot.routes.base_func import update_state, send_message
 
 from core.requests import ReserveController
@@ -14,22 +14,22 @@ from config import TelegramConfig
 
 router = Router(name=__name__)
 
-@router.message(AuthState.user, F.text == UserRK.GET)
-@router.message(HelpState.text, F.text == UserRK.GET)
-@router.message(ReserveState.add, F.text == UserRK.GET)
-@router.message(ReserveState.delete, F.text == UserRK.GET)
-@router.message(HelpState.documents, F.text == UserRK.GET)
-@router.message(ReserveState.get_free, F.text == UserRK.GET)
-@router.message(ReserveState.set_place_place, F.text == UserRK.GET)
-@router.message(ReserveState.set_place_reserve, F.text == UserRK.GET)
-@router.message(AuthState.user, Command(BotCommand(command="get_reserve", description="Получить бронирование")))
-@router.message(HelpState.text, Command(BotCommand(command="get_reserve", description="Получить бронирование")))
-@router.message(ReserveState.add, Command(BotCommand(command="get_reserve", description="Получить бронирование")))
-@router.message(ReserveState.delete, Command(BotCommand(command="get_reserve", description="Получить бронирование")))
-@router.message(HelpState.documents, Command(BotCommand(command="get_reserve", description="Получить бронирование")))
-@router.message(ReserveState.get_free, Command(BotCommand(command="get_reserve", description="Получить бронирование")))
-@router.message(ReserveState.set_place_place, Command(BotCommand(command="get_reserve", description="Получить бронирование")))
-@router.message(ReserveState.set_place_reserve, Command(BotCommand(command="get_reserve", description="Получить бронирование")))
+@router.message(AuthState.user, F.text == UserRK.GET_HISTORY_RESERVE)
+@router.message(HelpState.text, F.text == UserRK.GET_HISTORY_RESERVE)
+@router.message(ReserveState.add, F.text == UserRK.GET_HISTORY_RESERVE)
+@router.message(ReserveState.delete, F.text == UserRK.GET_HISTORY_RESERVE)
+@router.message(HelpState.documents, F.text == UserRK.GET_HISTORY_RESERVE)
+@router.message(ReserveState.get_free, F.text == UserRK.GET_HISTORY_RESERVE)
+@router.message(ReserveState.set_place_place, F.text == UserRK.GET_HISTORY_RESERVE)
+@router.message(ReserveState.set_place_reserve, F.text == UserRK.GET_HISTORY_RESERVE)
+@router.message(AuthState.user, Command(BotCommand(command="get_history_reserve", description="Получить бронирование")))
+@router.message(HelpState.text, Command(BotCommand(command="get_history_reserve", description="Получить бронирование")))
+@router.message(ReserveState.add, Command(BotCommand(command="get_history_reserve", description="Получить бронирование")))
+@router.message(ReserveState.delete, Command(BotCommand(command="get_history_reserve", description="Получить бронирование")))
+@router.message(HelpState.documents, Command(BotCommand(command="get_history_reserve", description="Получить бронирование")))
+@router.message(ReserveState.get_free, Command(BotCommand(command="get_history_reserve", description="Получить бронирование")))
+@router.message(ReserveState.set_place_place, Command(BotCommand(command="get_history_reserve", description="Получить бронирование")))
+@router.message(ReserveState.set_place_reserve, Command(BotCommand(command="get_history_reserve", description="Получить бронирование")))
 async def command_get_reserve(message: Message, state: FSMContext):
     data = await update_state(
         message=message,
@@ -40,16 +40,67 @@ async def command_get_reserve(message: Message, state: FSMContext):
         return
     access = data["access"]
     
+    list = ReserveController.get_state(
+        state=GetReserveAction.sended,
+        is_actual=False,
+        page_index=0,
+        token=access
+    ).data
+
     await message.answer(
         text=InlineReserve.print(
-            list=ReserveController.get_state(
-                state=InlineReserve.GetReserveAction.sended,
-                page_index=0,
-                token=access
-            ).data,
-            page_index=0
+            is_actual=False,
+            page_index=0,
+            list=list,
         ),
-        reply_markup=InlineReserve.build()
+        reply_markup=InlineReserve.build(
+            is_actual=False
+        )
+    )
+
+@router.message(AuthState.user, F.text == UserRK.GET_RESERVE)
+@router.message(HelpState.text, F.text == UserRK.GET_RESERVE)
+@router.message(ReserveState.add, F.text == UserRK.GET_RESERVE)
+@router.message(ReserveState.delete, F.text == UserRK.GET_RESERVE)
+@router.message(HelpState.documents, F.text == UserRK.GET_RESERVE)
+@router.message(ReserveState.get_free, F.text == UserRK.GET_RESERVE)
+@router.message(ReserveState.set_place_place, F.text == UserRK.GET_RESERVE)
+@router.message(ReserveState.set_place_reserve, F.text == UserRK.GET_RESERVE)
+@router.message(AuthState.user, Command(BotCommand(command="get_reserve", description="Получить бронирование")))
+@router.message(HelpState.text, Command(BotCommand(command="get_reserve", description="Получить бронирование")))
+@router.message(ReserveState.add, Command(BotCommand(command="get_reserve", description="Получить бронирование")))
+@router.message(ReserveState.delete, Command(BotCommand(command="get_reserve", description="Получить бронирование")))
+@router.message(HelpState.documents, Command(BotCommand(command="get_reserve", description="Получить бронирование")))
+@router.message(ReserveState.get_free, Command(BotCommand(command="get_reserve", description="Получить бронирование")))
+@router.message(ReserveState.set_place_place, Command(BotCommand(command="get_reserve", description="Получить бронирование")))
+@router.message(ReserveState.set_place_reserve, Command(BotCommand(command="get_reserve", description="Получить бронирование")))
+async def command_get_history_reserve(message: Message, state: FSMContext):
+    data = await update_state(
+        message=message,
+        state=state,
+        now_state=AuthState.user
+    )
+    if data is None:
+        return
+    access = data["access"]
+    
+    
+    list = ReserveController.get_state(
+        state=GetReserveAction.sended,
+        is_actual=True,
+        page_index=0,
+        token=access
+    ).data
+
+    await message.answer(
+        text=InlineReserve.print(
+            is_actual=True,
+            page_index=0,
+            list=list,
+        ),
+        reply_markup=InlineReserve.build(
+            is_actual=True
+        )
     )
 
 

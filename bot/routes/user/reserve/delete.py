@@ -6,8 +6,9 @@ from aiogram.types import Message, BotCommand
 from bot.states import HelpState, AuthState, ReserveState
 from bot.keyboard.reply import UserRK
 from bot.routes.base_func import update_state, send_message
+from bot.keyboard.inline import InlineProcessReserve
 
-from core.requests import DocumentController
+from core.requests import ReserveController
 
 from config import TelegramConfig
 
@@ -37,13 +38,27 @@ async def command_delete(message: Message, state: FSMContext):
     )
     if data is None:
         return
+    access = data["access"]
     
     # Вывести список доступных для удаления бронирований
-
-    message.answer(
-        text="Введите номер бронирования",
-        reply_markup=UserRK.rk()
+    list = ReserveController.get_process(
+        page_index=0,
+        token=access
     )
+    
+    if list.IsException():
+        await message.reply(
+            text="Операция провалилась"
+        )
+        return
+    message = await message.answer(
+        text=InlineProcessReserve.print(
+            list=list.data,
+            page_index=0,
+        ),
+        reply_markup=InlineProcessReserve.build()
+    )
+    await state.update_data(message_id=message.message_id)
 
 @router.message(ReserveState.delete)
 async def command_delete_id(message: Message, state: FSMContext):
@@ -54,4 +69,27 @@ async def command_delete_id(message: Message, state: FSMContext):
     )
     if data is None:
         return
+    
+    try:
+        index = int(message.text)
+    except:
+        await message.reply(
+            text="Необходимо ввести только индекс заявки на бронирование выведенное ранее!"
+        )
+        return
+    
     access = data["access"]
+
+
+    response = ReserveController.delete_index(
+        reserve_index=index,
+        token=access
+    )
+    if response.IsException():
+        await message.answer(
+            f"Удаление заявки провалилось"
+        )
+        return
+    await message.answer(
+        f"Заявка успешно удалена"
+    )

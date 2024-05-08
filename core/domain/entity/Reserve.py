@@ -10,6 +10,6 @@ class Reserve:
         self.reserve_begin = kwargs["reserve_begin"]
         self.reserve_end = kwargs["reserve_end"]
         if kwargs.get("place_code") is None:
-            self.place_code = "----"
+            self.place_code = "-------"
         else:
             self.place_code = kwargs["place_code"]

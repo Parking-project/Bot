@@ -69,6 +69,6 @@ async def reserve_delete(
         await callback_query.bot.edit_message_text(
             chat_id=callback_data.chat_id,
             message_id=callback_data.message_id,
-            text="Заявка на бронирование была одобрена"
+            text="Заявка на бронирование была отклонена"
         )
     await callback_query.message.delete()
