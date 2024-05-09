@@ -1,15 +1,14 @@
-from aiogram import F, Router
-from aiogram.types import Message
-from aiogram.filters import Command
-from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, BotCommand
+from aiogram.fsm.context import FSMContext
+from aiogram.filters import Command
+from aiogram.types import Message
+from aiogram import F, Router
 
-from bot.shared import ChatTypeFilter
-from bot.states import AuthState, HelpState, LogInState, RegisterState
+from bot.states import AuthState, HelpState, LogInState, RegisterState, ReserveState
 from bot.keyboard.reply import AuthRK, UserRK
+from bot.shared import ChatTypeFilter
 
 from core.requests import TokenController
-from core.domain.entity import ApiResponse
 
 router = Router(name=__name__)
 
@@ -32,23 +31,29 @@ async def command_logout(message: Message, state: FSMContext):
         reply_markup=AuthRK.rk()
     )
 
-@router.message(F.text == UserRK.EXIT, AuthState.user)
-@router.message(F.text == UserRK.EXIT, AuthState.admin)
-@router.message(F.text == UserRK.EXIT, HelpState.text)
-@router.message(F.text == UserRK.EXIT, HelpState.documents)
-@router.message(Command(BotCommand(command="exit", description="Команда выхода из аккаунта")),
-                ChatTypeFilter(chat_type=["private"]), HelpState.text)
-@router.message(Command(BotCommand(command="exit", description="Команда выхода из аккаунта")),
-                ChatTypeFilter(chat_type=["private"]), AuthState.admin)
-@router.message(Command(BotCommand(command="exit", description="Команда выхода из аккаунта")),
-                ChatTypeFilter(chat_type=["private"]), AuthState.user)
-@router.message(Command(BotCommand(command="exit", description="Команда выхода из аккаунта")),
-                ChatTypeFilter(chat_type=["private"]), HelpState.documents)
+@router.message(AuthState.admin, F.text == UserRK.EXIT)
+@router.message(AuthState.user, F.text == UserRK.EXIT)
+@router.message(HelpState.text, F.text == UserRK.EXIT)
+@router.message(HelpState.documents, F.text == UserRK.EXIT)
+@router.message(ReserveState.add, F.text == UserRK.EXIT)
+@router.message(ReserveState.delete, F.text == UserRK.EXIT)
+@router.message(ReserveState.set_place_place, F.text == UserRK.EXIT)
+@router.message(ReserveState.set_place_reserve, F.text == UserRK.EXIT)
+@router.message(ReserveState.get_free, F.text == UserRK.EXIT)
+@router.message(AuthState.admin, Command(BotCommand(command="exit", description="Команда выхода из аккаунта")), ChatTypeFilter(chat_type=["private"]))
+@router.message(AuthState.user, Command(BotCommand(command="exit", description="Команда выхода из аккаунта")), ChatTypeFilter(chat_type=["private"]))
+@router.message(HelpState.text, Command(BotCommand(command="exit", description="Команда выхода из аккаунта")), ChatTypeFilter(chat_type=["private"]))
+@router.message(HelpState.documents, Command(BotCommand(command="exit", description="Команда выхода из аккаунта")), ChatTypeFilter(chat_type=["private"]))
+@router.message(ReserveState.add, Command(BotCommand(command="exit", description="Команда выхода из аккаунта")), ChatTypeFilter(chat_type=["private"]))
+@router.message(ReserveState.delete, Command(BotCommand(command="exit", description="Команда выхода из аккаунта")), ChatTypeFilter(chat_type=["private"]))
+@router.message(ReserveState.set_place_place, Command(BotCommand(command="exit", description="Команда выхода из аккаунта")), ChatTypeFilter(chat_type=["private"]))
+@router.message(ReserveState.set_place_reserve, Command(BotCommand(command="exit", description="Команда выхода из аккаунта")), ChatTypeFilter(chat_type=["private"]))
+@router.message(ReserveState.get_free, Command(BotCommand(command="exit", description="Команда выхода из аккаунта")), ChatTypeFilter(chat_type=["private"]))
 async def command_logout(message: Message, state: FSMContext):
     data = await state.get_data()
     await state.clear()
     if data.get("access") is not None:
-        response: ApiResponse = TokenController.logout(token=data["access"])
+        TokenController.logout(token=data["access"])
     if data.get("refresh") is not None:
         TokenController.logout(token=data["refresh"])
     await message.answer(

@@ -14,8 +14,7 @@ from core.requests import AuthHistoryController, ReserveHistoryController, Token
 router = Router(name=__name__)
 
 # region history
-@router.callback_query(AuthState.admin,
-                       InlineAuthHistory.Callback.filter())
+@router.callback_query(AuthState.admin, InlineAuthHistory.Callback.filter())
 async def page_change_auth( 
     callback_query: CallbackQuery,
     callback_data: InlineAuthHistory.Callback,
@@ -31,21 +30,27 @@ async def page_change_auth(
         return
     access = data["access"]
     
-    auth_data = AuthHistoryController.get(
+    response = AuthHistoryController.get(
         token=access, 
         page_index=callback_data.page_index
-    ).data
+    )
+    if response.is_exception():
+        exception = response.get_exception()
+        await callback_query.message.delete()
+        await callback_query.message.answer(
+            text=f"Операция провалилась ({exception.message})"
+        )
+        return
 
     await callback_query.message.edit_text(
         text=InlineAuthHistory.print(
-            auth_data, 
+            response.data, 
             page_index=callback_data.page_index
         ),
         reply_markup=InlineAuthHistory.build(callback_data.page_index)
     )
 
-@router.callback_query(AuthState.admin,
-                       InlineReserveHistory.Callback.filter())
+@router.callback_query(AuthState.admin, InlineReserveHistory.Callback.filter())
 async def page_change_reserve(
     callback_query: CallbackQuery,
     callback_data: InlineReserveHistory.Callback,
@@ -61,19 +66,27 @@ async def page_change_reserve(
         return
     access = data["access"]
     
+    response = ReserveHistoryController.get(
+        token=access, 
+        page_index=callback_data.page_index
+    )
+    if response.is_exception():
+        exception = response.get_exception()
+        await callback_query.message.delete()
+        await callback_query.message.answer(
+            text=f"Операция провалилась ({exception.message})"
+        )
+        return
+    
     await callback_query.message.edit_text(
         text=InlineReserveHistory.print(
-            ReserveHistoryController.get(
-                token=access, 
-                page_index=callback_data.page_index
-            ).data, 
+            response.data, 
             page_index=callback_data.page_index
         ),
         reply_markup=InlineReserveHistory.build(callback_data.page_index)
     )
 
-@router.callback_query(AuthState.admin,
-                       InlineTokenBlocList.Callback.filter())
+@router.callback_query(AuthState.admin, InlineTokenBlocList.Callback.filter())
 async def page_change_token(
     callback_query: CallbackQuery,
     callback_data: InlineTokenBlocList.Callback,
@@ -89,12 +102,21 @@ async def page_change_token(
         return
     access = data["access"]
     
+    response = TokenBlocListController.get(
+        token=access, 
+        page_index=callback_data.page_index
+    )
+    if response.is_exception():
+        exception = response.get_exception()
+        await callback_query.message.delete()
+        await callback_query.message.answer(
+            text=f"Операция провалилась ({exception.message})"
+        )
+        return
+    
     await callback_query.message.edit_text(
         text=InlineTokenBlocList.print(
-            TokenBlocListController.get(
-                token=access, 
-                page_index=callback_data.page_index
-            ).data, 
+            response.data,
             page_index=callback_data.page_index
         ),
         reply_markup=InlineTokenBlocList.build(callback_data.page_index)

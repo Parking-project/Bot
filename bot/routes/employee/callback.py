@@ -1,10 +1,8 @@
-from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery
 from aiogram import Router, F
 
-from core.requests import TokenController
 from bot.keyboard.reply import BaseRK
-
 from bot.keyboard.inline.request_reserve import (
     ReserveAction,
     InlineBotReserve
@@ -21,17 +19,23 @@ async def reserve_approve(
     callback_data: InlineBotReserve.Callback,
     state: FSMContext
 ):
-    access = await employee_auth(
+    data = await employee_auth(
         message=callback_query.message,
         state=state
     )
+    if data is None:
+        await callback_query.answer()
+        return
+    access = data["access"]
     response = ReserveController.approve(
         reserve_id=callback_data.reserve_id,
         token=access
     )
-    if response.IsException():
+    if response.is_exception():
+        exception = response.get_exception()
         await callback_query.message.reply(
-            text="Операция провалилась"
+            text=f"Произоша ошибка! ({exception.message})",
+            reply_markup=BaseRK.help_rk()
         )
         return
 
@@ -40,7 +44,7 @@ async def reserve_approve(
         await callback_query.bot.edit_message_text(
             chat_id=callback_data.chat_id,
             message_id=callback_data.message_id,
-            text="Заявка на бронирование была одобрена"
+            text="Заявка на бронирование была одобрена",
         )
     await callback_query.message.delete()
 
@@ -50,17 +54,24 @@ async def reserve_delete(
     callback_data: InlineBotReserve.Callback,
     state: FSMContext
 ):
-    access = await employee_auth(
+    data = await employee_auth(
         message=callback_query.message,
         state=state
     )
-    response = ReserveController.approve(
+    if data is None:
+        await callback_query.answer()
+        return
+    access = data["access"]
+
+    response = ReserveController.delete(
         reserve_id=callback_data.reserve_id,
         token=access
     )
-    if response.IsException():
+    if response.is_exception():
+        exception = response.get_exception()
         await callback_query.message.reply(
-            text="Операция провалилась"
+            text=f"Произоша ошибка! {exception.message}",
+            reply_markup=BaseRK.help_rk()
         )
         return
 

@@ -2,6 +2,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from core.requests import TokenController, MessageController
 from core.domain.entity import ApiResponse
+from bot.keyboard.reply import UserRK
 
 def send_message(access: str, text: str, message: Message, answer_tg_id: int):
     return MessageController.post(
@@ -14,14 +15,16 @@ def send_message(access: str, text: str, message: Message, answer_tg_id: int):
 
 async def update_state(message: Message, state: FSMContext, now_state, **kwargs) -> dict[str]:
     data = await state.get_data()
-    response: ApiResponse = TokenController.check(
+    response: ApiResponse = TokenController.check_token(
         access=data.get("access"),
         refresh=data.get("refresh")
     )
-    if response.IsException():
+    if response.is_exception():
         if message is not None:
+            exception = response.get_exception()
             await message.answer(
-                text="Пожалуйста авторизируйтесь заново"
+                text=f"Пожалуйста авторизируйтесь заново ({exception.message})",
+                reply_markup=UserRK.rk()
             )
         await state.clear()
         return None
@@ -30,11 +33,12 @@ async def update_state(message: Message, state: FSMContext, now_state, **kwargs)
     )
 
     new_data = {
-        "access": response.data["access"],
-        "refresh": response.data["refresh"]
+        "access": response.data.access,
+        "refresh": response.data.refresh
     }
-    await state.update_data(
+    new_data = await state.update_data(
         data=new_data,
         **kwargs
     )
+
     return new_data

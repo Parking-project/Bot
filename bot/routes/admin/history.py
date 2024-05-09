@@ -15,6 +15,7 @@ from bot.keyboard.inline import (
 )
 
 from core.requests import AuthHistoryController, ReserveHistoryController, TokenBlocListController
+from core.domain.entity import ApiResponse
 
 router = Router(name=__name__)
 
@@ -29,13 +30,19 @@ async def command_auth_hostory(message: Message, state: FSMContext):
     if data is None:
         return
     access = data["access"]
+    response: ApiResponse = AuthHistoryController.get(
+        token=access, 
+        page_index=0
+    )
+    if response.is_exception():
+        await message.answer(
+            text=f"Операция провалилась ({response.data.message})"
+        )
+        return
 
     await message.answer(
         text=InlineAuthHistory.print(
-            AuthHistoryController.get(
-                token=access, 
-                page_index=0
-            ).data, 
+            response.data, 
             page_index=0
         ),
         reply_markup=InlineAuthHistory.build()
@@ -52,13 +59,19 @@ async def command_reserve_hostory(message: Message, state: FSMContext):
     if data is None:
         return
     access = data["access"]
+    response: ApiResponse = ReserveHistoryController.get(
+        token=access, 
+        page_index=0
+    )
+    if response.is_exception():
+        await message.answer(
+            text=f"Операция провалилась ({response.data.message})"
+        )
+        return
 
     await message.answer(
         text=InlineReserveHistory.print(
-            ReserveHistoryController.get(
-                token=access, 
-                page_index=0
-            ).data, 
+            list=response.data,
             page_index=0
         ),
         reply_markup=InlineReserveHistory.build()
@@ -75,13 +88,19 @@ async def command_token_bloclist(message: Message, state: FSMContext):
     if data is None:
         return
     access = data["access"]
+    response: ApiResponse = TokenBlocListController.get(
+        token=access, 
+        page_index=0
+    )
+    if response.is_exception():
+        await message.answer(
+            text=f"Операция провалилась ({response.data.message})"
+        )
+        return
     
     await message.answer(
         text=InlineTokenBlocList.print(
-            TokenBlocListController.get(
-                token=access, 
-                page_index=0
-            ).data, 
+            response.data, 
             page_index=0
         ),
         reply_markup=InlineTokenBlocList.build()

@@ -1,14 +1,15 @@
-from aiogram import F, Router
-from aiogram.types import Message
-from aiogram.filters import Command
-from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, BotCommand
+from aiogram.fsm.context import FSMContext
+from aiogram.filters import Command
+from aiogram.types import Message
+from aiogram import F, Router
 
-from bot.shared import ChatTypeFilter
-from bot.states import LogInState, AuthState
 from bot.keyboard.reply import AuthRK, UserRK, AdminRK
+from bot.states import LogInState, AuthState
+from bot.shared import ChatTypeFilter
 
 from core.requests import TokenController
+from core.domain.entity import ApiResponse, ApiMessage
 
 router = Router(name=__name__)
 
@@ -40,16 +41,16 @@ async def command_login_login(message: Message, state: FSMContext):
 async def command_login_password(message: Message, state: FSMContext):
     data = await state.get_data()
     await state.clear()
-    response = TokenController.login(data["login"], message.text)
-    if response.IsException():
-        error = response.data
+    response: ApiResponse = TokenController.login(data["login"], message.text)
+    if response.is_exception():
+        exception: ApiMessage = response.get_exception()
         await message.answer(
-            f"<b>Авторизация провалилась</b>\n\n{error}",
+            f"<b>Авторизация провалилась</b>\n\n{exception.message}",
             reply_markup=AuthRK.rk()
         )
         return
     rk = None
-    match(response.data["role"]):
+    match(response.data.role):
         case "USER":
             await state.set_state(AuthState.user)
             rk = UserRK.rk()
@@ -64,8 +65,8 @@ async def command_login_password(message: Message, state: FSMContext):
             )
             return
     await state.set_data(data={
-            "access": response.data["tokens"]["access"],
-            "refresh": response.data["tokens"]["refresh"]
+            "access": response.data.access,
+            "refresh": response.data.refresh
         }
     )
     await message.answer(

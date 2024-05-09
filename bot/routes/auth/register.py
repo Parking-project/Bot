@@ -1,14 +1,15 @@
-from aiogram import F, Router
-from aiogram.types import Message
-from aiogram.filters import Command
-from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, BotCommand
+from aiogram.fsm.context import FSMContext
+from aiogram.filters import Command
+from aiogram.types import Message
+from aiogram import F, Router
 
-from bot.shared import ChatTypeFilter
 from bot.states import RegisterState, AuthState
 from bot.keyboard.reply import AuthRK, UserRK
+from bot.shared import ChatTypeFilter
 
 from core.requests import TokenController
+from core.domain.entity import ApiResponse
 
 router = Router(name=__name__)
 
@@ -54,17 +55,17 @@ async def command_register_password(message: Message, state: FSMContext):
 async def command_register_display_name(message: Message, state: FSMContext):
     data = await state.get_data()
     await state.clear()
-    response = TokenController.register(data["login"], data["password"], message.text)
-    if response.IsException():
-        error = response.data
+    response: ApiResponse = TokenController.register(data["login"], data["password"], message.text)
+    if response.is_exception():
+        exception = response.get_exception()
         await message.answer(
-            f"<b>Регистрация провалилась провалилась</b>\n\n{error}",
+            f"<b>Регистрация провалилась провалилась</b>\n\n{exception.message}",
             reply_markup=AuthRK.rk()
         )
         return
     await state.set_data(data={
-            "access": response.data["access"],
-            "refresh": response.data["refresh"]
+            "access": response.data.access,
+            "refresh": response.data.refresh
         }
     )
     await state.set_state(AuthState.user)

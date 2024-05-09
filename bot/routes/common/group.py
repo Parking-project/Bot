@@ -1,8 +1,8 @@
-from aiogram import F, Router
-from aiogram.types import Message, BotCommand
 from aiogram.filters import Command, CommandStart
+from aiogram.types import Message, BotCommand
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
+from aiogram import F, Router
 
 from bot.shared import ChatTypeFilter
 

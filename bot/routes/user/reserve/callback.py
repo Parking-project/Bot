@@ -4,12 +4,14 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from bot.states import AuthState
+from bot.keyboard.reply import UserRK
 from bot.routes.base_func import update_state
 
 from bot.keyboard.inline import (
     InlineReserve,
     InlineUserReserve,
-    InlineProcessReserve
+    InlineProcessReserve,
+    InlineApproveReserve
 )
 from core.requests import ReserveController
 
@@ -37,9 +39,10 @@ async def user_reserve_action(
         reserve_id=callback_data.reserve_id,
         token=access
     )
-    if response.IsException():
+    if response.is_exception():
+        exception = response.get_exception()
         await callback_query.message.reply(
-            text="Операция провалилась"
+            text=f"Операция провалилась ({exception.message})"
         )
         return
 
@@ -68,16 +71,22 @@ async def page_change_reserve(
         return
     access = data["access"]
 
-    list = ReserveController.get_state(
+    response = ReserveController.get_state(
         state=callback_data.action,
         is_actual=callback_data.is_actual,
         page_index=callback_data.page_index,
         token=access
-    ).data
+    )
+    if response.is_exception():
+        exception = response.get_exception()
+        await callback_query.message.reply(
+            text=f"Операция провалилась ({exception.message})"
+        )
+        return
 
     await callback_query.message.edit_text(
         text=InlineReserve.print(
-            list=list,
+            list=response.data,
             is_actual=callback_data.is_actual,
             state=callback_data.action,
             page_index=callback_data.page_index
@@ -90,7 +99,7 @@ async def page_change_reserve(
     )
 
 @router.callback_query(InlineProcessReserve.Callback.filter())
-async def page_change_reserve( 
+async def page_change_delete_reserve( 
     callback_query: CallbackQuery,
     callback_data: InlineProcessReserve.Callback,
     state: FSMContext
@@ -105,14 +114,57 @@ async def page_change_reserve(
         return
     access = data["access"]
 
-    list = ReserveController.get_process(
+    response = ReserveController.get_process(
         page_index=callback_data.page_index,
         token=access
-    ).data
+    )
+    if response.is_exception():
+        exception = response.get_exception()
+        await callback_query.message.reply(
+            text=f"Операция провалилась ({exception.message})"
+        )
+        return
     
     await callback_query.message.edit_text(
         text=InlineProcessReserve.print(
-            list=list,
+            list=response.data,
+            page_index=callback_data.page_index,
+        ),
+        reply_markup=InlineProcessReserve.build(
+            page_index=callback_data.page_index
+        )
+    )
+
+@router.callback_query(InlineApproveReserve.Callback.filter())
+async def page_change_set_place_reserve( 
+    callback_query: CallbackQuery,
+    callback_data: InlineApproveReserve.Callback,
+    state: FSMContext
+):
+    now_state = await state.get_state()
+    data = await update_state(
+        message=callback_query.message,
+        state=state,
+        now_state=now_state
+    )
+    if data is None:
+        return
+    access = data["access"]
+
+    response = ReserveController.get_approve(
+        page_index=callback_data.page_index,
+        token=access
+    )
+    if response.is_exception():
+        exception = response.get_exception()
+        await callback_query.message.reply(
+            text=f"Операция провалилась ({exception.message})"
+        )
+        return
+    
+    await callback_query.message.edit_text(
+        text=InlineProcessReserve.print(
+            list=response.data,
             page_index=callback_data.page_index,
         ),
         reply_markup=InlineProcessReserve.build(
