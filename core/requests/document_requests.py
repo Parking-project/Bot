@@ -1,5 +1,5 @@
 from .base_requests import send_post_request
-from core.domain.entity import ApiResponse
+from core.domain.entity import ApiResponse, ApiMessage
 
 class DocumentController:
     CONTROLLER = "/document"
@@ -9,7 +9,7 @@ class DocumentController:
              file_unique_id: str, file_size: int,
              file_url: str, file_mime: str, token: str):
         
-        response_json = send_post_request(
+        response = send_post_request(
             cls.CONTROLLER + "/post",
             json={
                 "document_file_id": file_id,
@@ -19,9 +19,7 @@ class DocumentController:
                 "document_file_mime": file_mime
             },
             token=token
-        ).json()
+        )
 
-        if response_json.get("data") is None:
-            print("\n\n\n", response_json["message"], "\n\n\n")
-            return ApiResponse(response_json["message"], True)
-        return ApiResponse(response_json["data"])
+        message: ApiMessage = ApiMessage(**response.json())
+        return ApiResponse(message, response.status_code > 300)

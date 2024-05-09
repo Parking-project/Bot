@@ -1,5 +1,5 @@
 from .base_requests import send_post_request
-from core.domain.entity import Message, ApiResponse
+from core.domain.entity import ApiResponse, ApiMessage
 
 class MessageController:
     CONTROLLER = "/message"
@@ -10,7 +10,7 @@ class MessageController:
     
     @classmethod
     def post(cls, text, group_id, message_id, answer_tg_id, token):
-        response_json = send_post_request(
+        response = send_post_request(
             cls.CONTROLLER + "/post",
             json={
                 "text": text,
@@ -19,8 +19,7 @@ class MessageController:
                 cls.MESSAGE_BOT_ID: answer_tg_id
             },
             token=token
-        ).json()
+        )
 
-        if response_json.get("data") is None:
-            return ApiResponse(response_json["message"], True)
-        return ApiResponse(response_json["data"])
+        message: ApiMessage = ApiMessage(**response.json())
+        return ApiResponse(message, response.status_code > 300)

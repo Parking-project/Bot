@@ -1,73 +1,98 @@
 from .base_requests import send_get_request, send_post_request
-from core.domain.entity import ApiResponse
-from aiogram.fsm.context import FSMContext
+from core.domain.entity import ApiResponse, ApiMessage, User
 
 class TokenController:
     CONTROLLER = "/token"
     
     @classmethod
     def login(cls, login: str, password: str):
-        response_json = send_post_request(
+        response = send_post_request(
             cls.CONTROLLER + "/login",
             json={
                 "login": login,
                 "password": password
             }
-        ).json()
-        if response_json.get("tokens") is None:
-            return ApiResponse(response_json["message"], True)
-        return ApiResponse(response_json)
+        )
+        if response.status_code < 300:
+            data = User(**response.json())
+            return ApiResponse(data)
+        message: ApiMessage = ApiMessage(**response.json())
+        return ApiResponse(message, True)
     
     @classmethod
     def register(cls, login: str, password: str, display_name: str):
-        response_json = send_post_request(
+        response = send_post_request(
             cls.CONTROLLER + "/register",
             json={
                 "login": login,
                 "password": password,
                 "display_name": display_name
             }
-        ).json()
-        if response_json.get("tokens") is None:
-            return ApiResponse(response_json["message"], True)
-        return ApiResponse(response_json)
+        )
+        if response.status_code < 300:
+            data = User(**response.json())
+            return ApiResponse(data)
+        
+        message: ApiMessage = ApiMessage(**response.json())
+        return ApiResponse(message, True)
         
     @classmethod
-    def check(cls, access, refresh):
-        response = send_get_request(
-            cls.CONTROLLER + "/check",
-            json={},
-            token=access
-        )
-        if response.status_code == 200:
-            return ApiResponse(
-                {
-                    "access": access,
-                    "refresh": refresh,
-                }
+    def check_token(cls, access, refresh):
+        if access is not None:
+            response = send_get_request(
+                cls.CONTROLLER + "/check_token",
+                json={},
+                token=access
             )
+            if response.status_code < 300:
+                user = User(**{
+                    "tokens":{
+                        "access": access,
+                        "refresh": refresh,
+                    },
+                    "role": response.json()["role"]
+                })
+                return ApiResponse(user)
+            
         response = send_get_request(
             "/token/refresh",
             json={}, 
             token=refresh
         )
-        if response.status_code == 200:
+        if response.status_code < 300:
             access = response.json()["access"]
-            return ApiResponse(
-                {
-                    "access": access,
-                    "refresh": refresh,
-                }
+            response = send_get_request(
+                cls.CONTROLLER + "/check_token",
+                json={},
+                token=access
             )
-        return ApiResponse(response.json()["message"], True)
+            if response.status_code < 300:
+                user = User(**{
+                    "tokens":{
+                        "access": access,
+                        "refresh": refresh,
+                    },
+                    "role": response.json()["role"]
+                })
+                return ApiResponse(user)
+        message: ApiMessage = ApiMessage(**response.json())
+        return ApiResponse(message, True)
+    
+    @classmethod
+    def check_connect(cls):
+        response = send_get_request(
+            cls.CONTROLLER + "/check_connection",
+            json={},
+        )
+        message: ApiMessage = ApiMessage(**response.json())
+        return ApiResponse(message, response.status_code > 300)
     
     @classmethod
     def logout(cls, token):
-        response_json = send_get_request(
+        response = send_get_request(
             cls.CONTROLLER + "/logout",
             json={},
             token=token
-        ).json()
-        if response_json.get("data") is None:
-            return ApiResponse(response_json["message"], True)
-        return ApiResponse(response_json)
+        )
+        message: ApiMessage = ApiMessage(**response.json())
+        return ApiResponse(message, response.status_code > 300)
