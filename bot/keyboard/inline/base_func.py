@@ -24,6 +24,7 @@ def build_paginator_action(cls: Inline, page_index: int, **kwargs):
                 **kwargs
             ).pack(),
         )
+    # create_button(text="🔁", page_index=page_index)
     if page_index != 0:
         create_button(text="<<", page_index=page_index-1)
         create_button(text="Вернуться", page_index=0)

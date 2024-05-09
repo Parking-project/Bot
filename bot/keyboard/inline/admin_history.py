@@ -1,9 +1,9 @@
-from aiogram.filters.callback_data import CallbackData
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from bot.keyboard.inline.base_func import build_paginator_action
+from aiogram.filters.callback_data import CallbackData
 
+from bot.keyboard.inline.base_func import build_paginator_action
 from .base_func import Inline
-from core.domain.entity import AuthHistory, ReserveHistory, TokenBlocList
+
 import datetime
 
 class InlineAuthHistory(Inline):
@@ -33,7 +33,7 @@ class InlineAuthHistory(Inline):
                             
         for auth_data in list:
             message_text += auth_data.user_id + "\t|\t" + \
-                datetime.datetime.utcfromtimestamp(
+                datetime.datetime.fromtimestamp(
                     auth_data.auth_date
                 ).strftime("%d.%m.%Y %H:%M:%S") + "\n"
     
@@ -105,7 +105,7 @@ class InlineTokenBlocList(Inline):
                             
         for token_bloc in list:
             message_text += token_bloc.token_jti + "\t|\t" + \
-                datetime.datetime.utcfromtimestamp(
+                datetime.datetime.fromtimestamp(
                     token_bloc.token_create
                 ).strftime("%d:%m:%Y %H:%M:%S") + "\n"
     

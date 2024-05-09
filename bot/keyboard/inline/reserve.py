@@ -1,8 +1,11 @@
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.filters.callback_data import CallbackData
 from enum import IntEnum, auto
-from aiogram.utils.keyboard import InlineKeyboardBuilder
+
 from .base_func import build_paginator_action, Inline
-from core.domain.entity import Place, Reserve
+
+from core.domain.entity import Reserve
+
 import datetime
 
 class GetReserveAction(IntEnum):
@@ -58,7 +61,7 @@ class InlineReserve(Inline):
                     ).pack(),
                 )
         if page_index == 0:
-            builder.adjust(1)
+            builder.adjust(1, 1)
         else:
             builder.adjust(3, 1)
 
@@ -81,16 +84,16 @@ class InlineReserve(Inline):
         
         for reserve_data in list:
             message_text += f"  {reserve_data.place_code}         "+\
-                datetime.datetime.utcfromtimestamp(
+                datetime.datetime.fromtimestamp(
                     reserve_data.reserve_begin
                 ).strftime("%d.%m.%Y %H:%M:%S") + "         "+\
-                datetime.datetime.utcfromtimestamp(
+                datetime.datetime.fromtimestamp(
                     reserve_data.reserve_end
                 ).strftime("%d.%m.%Y %H:%M:%S")+"\n"
         return message_text
 
 class InlineProcessReserve(Inline):
-    class Callback(CallbackData, prefix='actual_reserve'):
+    class Callback(CallbackData, prefix='process_reserve'):
         page_index: int
 
     @classmethod
@@ -118,30 +121,30 @@ class InlineProcessReserve(Inline):
         for reserve_data in list:
             message_text += f"       {index}"
             message_text += f"          {reserve_data.place_code}"
-            message_text += "         " + datetime.datetime.utcfromtimestamp(
+            message_text += "         " + datetime.datetime.fromtimestamp(
                     reserve_data.reserve_begin
                 ).strftime("%d.%m.%Y %H:%M:%S")
-            message_text += "         " + datetime.datetime.utcfromtimestamp(
+            message_text += "         " + datetime.datetime.fromtimestamp(
                     reserve_data.reserve_end
                 ).strftime("%d.%m.%Y %H:%M:%S")
             message_text += "\n"
             index += 1
         return message_text
 
-class InlinePlace(Inline):
-    class Callback(CallbackData, prefix='inline_place'):
+class InlineApproveReserve(Inline):
+    class Callback(CallbackData, prefix='approve_reserve'):
         page_index: int
 
     @classmethod
     def create(cls, **kwargs):
-        return InlineReserve.Callback(
+        return InlineProcessReserve.Callback(
             page_index=kwargs.get("page_index")
         )
     
     @classmethod
     def build(cls, page_index=0):
         builder: InlineKeyboardBuilder = build_paginator_action(
-            cls = InlinePlace,
+            cls = InlineProcessReserve,
             page_index=page_index
         )
         builder.adjust(3)
@@ -149,13 +152,20 @@ class InlinePlace(Inline):
         return builder.as_markup(resize_keyboard=True)
 
     @classmethod
-    def print(cls, list: list, page_index=0):
-        message_text = f"История авторизаций\nСтраница {page_index+1}\n\n"
-        message_text += "   Нумерация       Код парковочного места   \n\n"
+    def print(cls, list: list[Reserve], page_index=0):
+        message_text = f"Одобренные бронирования \nСтраница {page_index+1}\n\n"
+        message_text += "Индекс   Места       Время начала                 Время окончания\n\n"
         
-        index = 1
-        for place_data in list:
-            message_text += f"    {index}        {place_data.place_code}"
+        index = page_index * 10
+        for reserve_data in list:
+            message_text += f"       {index}"
+            message_text += f"          {reserve_data.place_code}"
+            message_text += "         " + datetime.datetime.fromtimestamp(
+                    reserve_data.reserve_begin
+                ).strftime("%d.%m.%Y %H:%M:%S")
+            message_text += "         " + datetime.datetime.fromtimestamp(
+                    reserve_data.reserve_end
+                ).strftime("%d.%m.%Y %H:%M:%S")
+            message_text += "\n"
             index += 1
         return message_text
-    

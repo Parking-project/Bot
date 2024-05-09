@@ -5,9 +5,8 @@ class UserRK:
     
     GET_RESERVE = "Получить  заявки"
     GET_HISTORY_RESERVE = "Получить историю заявок"
-    GET_FREE_PLACE = "Свободные места"
-    ADD_RESERVE = "Добавить"
-    DELETE_RESERVE = "Удалить"
+    ADD_RESERVE = "Добавить бронирование"
+    DELETE_RESERVE = "Удалить бронирование"
     SET_PLACE_RESERVE = "Выбор парковочного места"
 
     EXIT = "Выход из аккаунта"
@@ -20,9 +19,6 @@ class UserRK:
         )
         builder.button(
             text=cls.GET_HISTORY_RESERVE
-        )
-        builder.button(
-            text=cls.GET_FREE_PLACE
         )
         builder.button(
             text=cls.ADD_RESERVE

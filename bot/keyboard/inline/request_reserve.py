@@ -1,6 +1,9 @@
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.filters.callback_data import CallbackData
 from enum import IntEnum, auto
-from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+
+
 from .base_func import Inline
 
 class ReserveAction(IntEnum):
