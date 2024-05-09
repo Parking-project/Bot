@@ -1,9 +1,9 @@
 class User:
-    ID: str
-    user_login: str
-    user_salt: str
-    user_pass: str
-    user_display_name: str
-    user_registered: int
+    access: str
+    refresh: str
+    role: str
 
-    role_id: str
+    def __init__(self, **kwargs) -> None:
+        self.access = kwargs["tokens"]["access"]
+        self.refresh = kwargs["tokens"]["refresh"]
+        self.role = kwargs["role"]

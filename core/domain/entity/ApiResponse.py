@@ -1,11 +1,19 @@
-class ApiResponse:
-    is_exception: bool
+from .ApiMessage import ApiMessage
 
-    def __init__(self, data, is_exception=False):
+class ApiResponse:
+    exception: bool
+
+    def __init__(self, data, exception=False):
         self.data = data
-        self.is_exception = is_exception
-        if is_exception:
+        self.exception = exception
+        if exception:
             print("\n\n\nData = ", data, "\n\n\n")
 
-    def IsException(self):
-        return self.is_exception
+    def is_exception(self):
+        return self.exception
+    
+    def get_data(self):
+        return self.data
+    
+    def get_exception(self) -> ApiMessage:
+        return self.data

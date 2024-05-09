@@ -1,22 +1,22 @@
 __all__ = (
+    "ApiMessage",
     "AuthHistory",
-    "Document",
-    "Message",
     "Place",
     "Reserve",
     "ReserveHistory",
+    "ReserveAction",
     "Role",
     "TokenBlocList",
     "User",
     "ApiResponse",
 )
 
+from .ApiMessage import ApiMessage
 from .AuthHistory import AuthHistory
-from .Document import Document
-from .Message import Message
 from .Place import Place
 from .Reserve import Reserve
 from .ReserveHistory import ReserveHistory
+from .ReserveAction import ReserveAction
 from .TokenBlocList import TokenBlocList
 from .User import User
 
