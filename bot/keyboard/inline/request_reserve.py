@@ -12,13 +12,11 @@ class ReserveAction(IntEnum):
 
 class InlineUserReserve(Inline):
     class Callback(CallbackData, prefix='urr'):
-        message_id: int
         reserve_id: str
 
     @classmethod
     def create(cls, **kwargs):
         return InlineUserReserve.Callback(
-            message_id=kwargs.get("message_id"),
             reserve_id=kwargs.get("reserve_id"),
         )
     
@@ -28,7 +26,6 @@ class InlineUserReserve(Inline):
         builder.button(
             text="Отменить",
             callback_data=InlineUserReserve.create(
-                message_id=message_id,
                 reserve_id=reserve_id
             ).pack(),
         )

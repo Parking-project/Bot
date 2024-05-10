@@ -12,14 +12,14 @@ class GetReserveAction(IntEnum):
     delete = auto()
     sended = auto()
     accept = auto()
-    payed = auto()
+    # payed = auto()
 
 class InlineReserve(Inline):
     state = {
         GetReserveAction.delete: "удаленные",
         GetReserveAction.sended: "отправленные",
         GetReserveAction.accept: "принятые",
-        GetReserveAction.payed: "оплаченные",
+        # GetReserveAction.payed: "оплаченные",
     }
 
     class Callback(CallbackData, prefix='reserve'):
@@ -137,14 +137,14 @@ class InlineApproveReserve(Inline):
 
     @classmethod
     def create(cls, **kwargs):
-        return InlineProcessReserve.Callback(
-            page_index=kwargs.get("page_index")
+        return InlineApproveReserve.Callback(
+            page_index=kwargs["page_index"]
         )
     
     @classmethod
     def build(cls, page_index=0):
         builder: InlineKeyboardBuilder = build_paginator_action(
-            cls = InlineProcessReserve,
+            cls = InlineApproveReserve,
             page_index=page_index
         )
         builder.adjust(3)

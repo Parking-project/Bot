@@ -8,7 +8,8 @@ __all__ = (
     "GetReserveAction",
     "InlineReserve",
     "InlineProcessReserve",
-    "InlineApproveReserve"
+    "InlineApproveReserve",
+    "InlinePlace"
 )
 
 from .admin_history import (
@@ -27,3 +28,5 @@ from .reserve import (
     InlineProcessReserve,
     InlineApproveReserve
 )
+
+from .place import InlinePlace
