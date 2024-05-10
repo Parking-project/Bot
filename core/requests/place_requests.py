@@ -5,11 +5,11 @@ class PlaceController:
     CONTROLLER = "/place"
     
     @classmethod
-    def get_free(cls, hours: int, page_index: int, token: str):
+    def get_free_id(cls, reserve_id: str, page_index: int, token: str):
         response = send_get_request(
-            cls.CONTROLLER + "/get_free",
+            cls.CONTROLLER + "/get_free_id",
             json={
-                "hours": hours,
+                "reserve_id": reserve_id,
                 "page_index": page_index,
                 "page_size": 10
             },
@@ -22,13 +22,12 @@ class PlaceController:
         return ApiResponse(message, True)
     
     @classmethod
-    def get_prefix(cls, prefix, page_index, token):
+    def get_free_period(cls, reserve_begin: int, reserve_end: int, page_index: int, token: str):
         response = send_get_request(
-            cls.CONTROLLER + "/get_prefix",
+            cls.CONTROLLER + "/get_free_period",
             json={
-                "place_prefix": prefix,
-                "page_index": page_index,
-                "page_size": 10
+                "reserve_begin": reserve_begin,
+                "reserve_end": reserve_end
             },
             token=token
         )

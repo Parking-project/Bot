@@ -16,7 +16,7 @@ class AuthHistoryController:
         )
 
         if response.status_code < 300:
-            reserve_history_list = [AuthHistory(**k) for k in response["data"]]
+            reserve_history_list = [AuthHistory(**k) for k in response.json()["data"]]
             return ApiResponse(reserve_history_list)
         message: ApiMessage = ApiMessage(**response.json())
         return ApiResponse(message, True)
