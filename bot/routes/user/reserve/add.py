@@ -26,11 +26,17 @@ from bot.keyboard.inline import (
 from core.requests import ReserveController
 from core.domain.entity import ReserveAction
 
+from ..base_handlers import check_user_response_exception
+
 router = Router(name=__name__)
 
 @router.message(ReserveState.add)
 async def command_add_hours(message: Message, state: FSMContext):
-    data = await update_state(message, state, AuthState.user)
+    await state.set_state(AuthState.user)
+    data = await update_state(
+        message, 
+        state
+    )
     if data is None:
         return
     access = data["access"]
@@ -43,23 +49,23 @@ async def command_add_hours(message: Message, state: FSMContext):
             reply_markup=UserRK.rk()
         )
         return
-    message = await message.answer(
+    answer = await message.answer(
         text="***Отправка заявки***"
     )
     response: ApiResponse = ReserveController.post(
-        chat_id=message.chat.id,
-        message_id=message.message_id,
+        chat_id=answer.chat.id,
+        message_id=answer.message_id,
         hours=hours,
         token=access
     )
-    if response.is_exception():
-        exception = response.get_exception()
-        await message.edit_text(
-            text=f"Отправка заявки провалилась ({exception.message})"
+    
+    if await check_user_response_exception(response, message, state):
+        await answer.edit_text(
+            text="Отправка заявки провалилась"
         )
     else:
         response_data: ReserveAction = response.get_data()
-        await message.edit_text(
+        await answer.edit_text(
             text="Заявка отправлена",
             reply_markup=InlineUserReserve.build(
                 message_id=response_data.message_id,

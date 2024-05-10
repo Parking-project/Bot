@@ -7,10 +7,23 @@ from bot.routes.base_func import update_state
 from bot.keyboard.reply import UserRK
 from bot.keyboard.inline import (
     InlineProcessReserve, 
-    GetReserveAction, InlineReserve
+    InlineReserve,
+    InlineApproveReserve
 )
 
+from core.domain.entity import ApiResponse
 from core.requests import ReserveController
+
+async def check_user_response_exception(response: ApiResponse, message: Message, state: FSMContext):
+    if response.is_exception():
+        exception = response.get_exception()
+        await message.reply(
+            text=exception.message
+        )
+        await state.set_state(AuthState.user)
+        return True
+    return False
+
 
 router = Router(name=__name__)
 
@@ -25,8 +38,7 @@ router = Router(name=__name__)
 async def command_send_message(message: Message, state: FSMContext):
     data = await update_state(
         message=message,
-        state=state,
-        now_state=HelpState.text
+        state=state
     )
     if data is None:
         return
@@ -35,6 +47,7 @@ async def command_send_message(message: Message, state: FSMContext):
         text="Введите текст сообщения и прикрепите файлы",
         reply_markup=UserRK.rk()
     )
+    await state.set_state(HelpState.text)
 
 @router.message(AuthState.user, F.text == UserRK.ADD_RESERVE)
 @router.message(HelpState.text, F.text == UserRK.ADD_RESERVE)
@@ -47,8 +60,7 @@ async def command_send_message(message: Message, state: FSMContext):
 async def command_add_reserve(message: Message, state: FSMContext):
     data = await update_state(
         message=message,
-        state=state,
-        now_state=ReserveState.add
+        state=state
     )
     if data is None:
         return
@@ -57,6 +69,7 @@ async def command_add_reserve(message: Message, state: FSMContext):
         text="Введите длительность бронирования в часах",
         reply_markup=UserRK.rk()
     )
+    await state.set_state(ReserveState.add)
 
 @router.message(AuthState.user, F.text == UserRK.DELETE_RESERVE)
 @router.message(HelpState.text, F.text == UserRK.DELETE_RESERVE)
@@ -69,23 +82,25 @@ async def command_add_reserve(message: Message, state: FSMContext):
 async def command_delete_reserve(message: Message, state: FSMContext):
     data = await update_state(
         message=message,
-        state=state,
-        now_state=ReserveState.delete
+        state=state
     )
     if data is None:
         return
     access = data["access"]
     
-    response = ReserveController.get_process(
+    response = ReserveController.get_state(
+        states=[2, 3],
         page_index=0,
         token=access
     )
     
-    if response.is_exception():
-        exception = response.get_exception()
-        await message.reply(
-            text=f"Операция провалилась ({exception.message})"
+    if await check_user_response_exception(response, message, state):
+        return
+    if len(response.data) == 0:
+        await message.answer(
+            "Бронирований для удаления не найдено"
         )
+        await state.set_state(AuthState.user)
         return
     message = await message.answer(
         text=InlineProcessReserve.print(
@@ -95,6 +110,7 @@ async def command_delete_reserve(message: Message, state: FSMContext):
         reply_markup=InlineProcessReserve.build()
     )
     await state.update_data(message_id=message.message_id)
+    await state.set_state(ReserveState.delete)
 
 @router.message(AuthState.user, F.text == UserRK.GET_HISTORY_RESERVE)
 @router.message(HelpState.text, F.text == UserRK.GET_HISTORY_RESERVE)
@@ -115,17 +131,12 @@ async def command_get_reserve(message: Message, state: FSMContext):
     access = data["access"]
     
     response = ReserveController.get_state(
-        state=GetReserveAction.sended,
-        is_actual=False,
+        states=[2],
         page_index=0,
         token=access
     )
     
-    if response.is_exception():
-        exception = response.get_exception()
-        await message.reply(
-            text=f"Операция провалилась ({exception.message})"
-        )
+    if await check_user_response_exception(response, message, state):
         return
     await message.answer(
         text=InlineReserve.print(
@@ -158,17 +169,12 @@ async def command_get_history_reserve(message: Message, state: FSMContext):
     
     
     response = ReserveController.get_state(
-        state=GetReserveAction.sended,
-        is_actual=True,
+        states=[2],
         page_index=0,
         token=access
     )
-    
-    if response.is_exception():
-        exception = response.get_exception()
-        await message.reply(
-            text=f"Операция провалилась ({exception.message})"
-        )
+
+    if await check_user_response_exception(response, message, state):
         return
 
     await message.answer(
@@ -200,8 +206,29 @@ async def command_set_place(message: Message, state: FSMContext):
         return
     access = data["access"]
     
-    # Вывести список доступных бронирований
-
+    response = ReserveController.get_state(
+        states=[3],
+        page_index=0,
+        token=access
+    )
+    if await check_user_response_exception(response, message, state):
+        return
+    if len(response.data) == 0:
+        await message.answer(
+            "Доступных бронирований для указания парковочного места не найдено"
+        )
+        await state.set_state(AuthState.user)
+        return
+    
+    message = await message.answer(
+        text=InlineApproveReserve.print(
+            list=response.data,
+            page_index=0,
+        ),
+        reply_markup=InlineApproveReserve.build()
+    )
+    await state.update_data(message_id=message.message_id)
+    await state.set_state(ReserveState.set_place_reserve)
     message.answer(
         text="Введите номер бронирования",
         reply_markup=UserRK.rk()

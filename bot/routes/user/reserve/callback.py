@@ -11,11 +11,14 @@ from bot.keyboard.inline import (
     InlineReserve,
     InlineUserReserve,
     InlineProcessReserve,
-    InlineApproveReserve
+    InlineApproveReserve,
+    InlinePlace
 )
 from core.requests import ReserveController
 
 from config import TelegramConfig
+
+from ..base_handlers import check_user_response_exception
 
 router = Router(name=__name__)
 
@@ -39,19 +42,11 @@ async def user_reserve_action(
         reserve_id=callback_data.reserve_id,
         token=access
     )
-    if response.is_exception():
-        exception = response.get_exception()
-        await callback_query.message.reply(
-            text=f"Операция провалилась ({exception.message})"
-        )
+    if await check_user_response_exception(response, callback_query.message, state):
         return
 
     await callback_query.message.edit_text(
         text="Заявка на бронирование была удалена"
-    )
-    await callback_query.bot.delete_message(
-        chat_id=TelegramConfig.RESERVETION_GROUP_ID,
-        message_id=callback_data.message_id
     )
     await callback_query.answer()
 
@@ -71,17 +66,19 @@ async def page_change_reserve(
         return
     access = data["access"]
 
-    response = ReserveController.get_state(
-        state=callback_data.action,
-        is_actual=callback_data.is_actual,
-        page_index=callback_data.page_index,
-        token=access
-    )
-    if response.is_exception():
-        exception = response.get_exception()
-        await callback_query.message.reply(
-            text=f"Операция провалилась ({exception.message})"
+    if callback_data.page_index:
+        response = ReserveController.get_actual_state(
+            states=[callback_data.action],
+            page_index=callback_data.page_index,
+            token=access
         )
+    else:
+        response = ReserveController.get_state(
+            states=[callback_data.action],
+            page_index=callback_data.page_index,
+            token=access
+        )
+    if await check_user_response_exception(response, callback_query.message, state):
         return
 
     await callback_query.message.edit_text(
@@ -114,15 +111,12 @@ async def page_change_delete_reserve(
         return
     access = data["access"]
 
-    response = ReserveController.get_process(
+    response = ReserveController.get_state(
+        states=[2, 3],
         page_index=callback_data.page_index,
         token=access
     )
-    if response.is_exception():
-        exception = response.get_exception()
-        await callback_query.message.reply(
-            text=f"Операция провалилась ({exception.message})"
-        )
+    if await check_user_response_exception(response, callback_query.message, state):
         return
     
     await callback_query.message.edit_text(
@@ -151,23 +145,55 @@ async def page_change_set_place_reserve(
         return
     access = data["access"]
 
-    response = ReserveController.get_approve(
+    response = ReserveController.get_state(
+        states=[3],
         page_index=callback_data.page_index,
         token=access
     )
-    if response.is_exception():
-        exception = response.get_exception()
-        await callback_query.message.reply(
-            text=f"Операция провалилась ({exception.message})"
-        )
+    if await check_user_response_exception(response, callback_query.message, state):
         return
     
     await callback_query.message.edit_text(
-        text=InlineProcessReserve.print(
+        text=InlineApproveReserve.print(
             list=response.data,
             page_index=callback_data.page_index,
         ),
-        reply_markup=InlineProcessReserve.build(
+        reply_markup=InlineApproveReserve.build(
+            page_index=callback_data.page_index
+        )
+    )
+
+
+@router.callback_query(InlinePlace.Callback.filter())
+async def page_change_set_place_reserve( 
+    callback_query: CallbackQuery,
+    callback_data: InlinePlace.Callback,
+    state: FSMContext
+):
+    now_state = await state.get_state()
+    data = await update_state(
+        message=callback_query.message,
+        state=state,
+        now_state=now_state
+    )
+    if data is None:
+        return
+    access = data["access"]
+
+    response = ReserveController.get_state(
+        states=[3],
+        page_index=callback_data.page_index,
+        token=access
+    )
+    if await check_user_response_exception(response, callback_query.message, state):
+        return
+    
+    await callback_query.message.edit_text(
+        text=InlineApproveReserve.print(
+            list=response.data,
+            page_index=callback_data.page_index,
+        ),
+        reply_markup=InlineApproveReserve.build(
             page_index=callback_data.page_index
         )
     )

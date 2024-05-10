@@ -10,6 +10,7 @@ from bot.routes.base_func import update_state, send_message
 from core.requests import DocumentController
 
 from config import TelegramConfig
+from .base_handlers import check_user_response_exception
 
 router = Router(name=__name__)
 
@@ -31,10 +32,10 @@ async def send_document(access: str, message: Message, mime: str):
 @router.message(HelpState.text, F.photo)
 @router.message(HelpState.text, F.document)
 async def command_send_document(message: Message, state: FSMContext):
+    await state.set_state(HelpState.documents)
     data = await update_state(
         message=message,
-        state=state,
-        now_state=HelpState.documents
+        state=state
     )
     if data is None:
         return
@@ -69,17 +70,7 @@ async def command_send_document(message: Message, state: FSMContext):
         message=message, 
         answer_tg_id=answer_tg_id
     )
-    if response.is_exception():
-        exception = response.get_exception()
-        await message.reply(
-            text=f"Не удалось отправить сообщение! {exception.message}",
-            reply_markup=UserRK.rk()
-        )
-        await update_state(
-            message=message,
-            state=state,
-            now_state=AuthState.user
-        )
+    if await check_user_response_exception(response, message, state):
         return 
 
     response = await send_document(
@@ -88,24 +79,14 @@ async def command_send_document(message: Message, state: FSMContext):
         mime=mime
     )
 
-    if response.is_exception():
-        exception = response.get_exception()
-        await message.reply(
-            text=f"Не удалось отправить файл! {exception.message}",
-            reply_markup=UserRK.rk()
-        )
-        await update_state(
-            message=message,
-            state=state,
-            now_state=AuthState.user
-        )
+    await check_user_response_exception(response, message, state)
 
 @router.message(HelpState.text)
 async def command_send_text(message: Message, state: FSMContext):
+    await state.set_state(HelpState.documents)
     data = await update_state(
         message=message,
-        state=state,
-        now_state=HelpState.documents
+        state=state
     )
     if data is None:
         return
@@ -121,18 +102,7 @@ async def command_send_text(message: Message, state: FSMContext):
         message=message, 
         answer_tg_id=answer_tg_id
     )
-    if response.is_exception():
-        exception = response.get_exception()
-        await message.reply(
-            text=f"Не удалось отправить сообщение! {exception.message}",
-            reply_markup=UserRK.rk()
-        )
-        await update_state(
-            message=message,
-            state=state,
-            now_state=AuthState.user
-        )
-        return 
+    await check_user_response_exception(response, message, state)
 
 
 @router.message(HelpState.documents, F.photo)
@@ -155,11 +125,6 @@ async def command_send_photo(message: Message, state: FSMContext):
                 text="Для отправки фото не сжимайте их",
                 reply_markup=UserRK.rk()
             )
-            await update_state(
-                message=message,
-                state=state,
-                now_state=AuthState.user
-            )
             return
     
     
@@ -169,14 +134,4 @@ async def command_send_photo(message: Message, state: FSMContext):
         mime=mime
     )
 
-    if response.is_exception():
-        exception = response.get_exception()
-        await message.reply(
-            text=f"Не удалось отправить файл! {exception.message}",
-            reply_markup=UserRK.rk()
-        )
-        await update_state(
-            message=message,
-            state=state,
-            now_state=AuthState.user
-        )
+    await check_user_response_exception(response, message, state)

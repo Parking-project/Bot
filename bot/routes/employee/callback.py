@@ -54,6 +54,7 @@ async def reserve_delete(
     callback_data: InlineBotReserve.Callback,
     state: FSMContext
 ):
+    print("\n\n\nmessage_id = ", callback_query.message.message_id, "\n\n\n")
     data = await employee_auth(
         message=callback_query.message,
         state=state

@@ -12,14 +12,16 @@ from core.requests import ReserveController
 
 from config import TelegramConfig
 
+from ..base_handlers import check_user_response_exception
+
 router = Router(name=__name__)
 
 @router.message(ReserveState.delete)
 async def command_delete_id(message: Message, state: FSMContext):
+    await state.set_state(AuthState.user)
     data = await update_state(
         message=message,
-        state=state,
-        now_state=AuthState.user
+        state=state
     )
     if data is None:
         return
@@ -36,16 +38,15 @@ async def command_delete_id(message: Message, state: FSMContext):
     access = data["access"]
 
 
+    await message.bot.delete_message(
+        message.chat.id,
+        message_id=data["message_id"]
+    )
     response = ReserveController.delete_index(
         reserve_index=index,
         token=access
     )
-    if response.is_exception():
-        exception = response.get_exception()
-        await message.answer(
-            text=f"Удаление заявки провалилось ({exception.message})",
-            reply_markup=UserRK.rk()
-        )
+    if await check_user_response_exception(response, message, state):
         return
     await message.answer(
         text=f"Заявка успешно удалена",

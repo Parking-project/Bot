@@ -2,7 +2,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from core.requests import TokenController, MessageController
 from core.domain.entity import ApiResponse
-from bot.keyboard.reply import UserRK
+from bot.keyboard.reply import AuthRK
 
 def send_message(access: str, text: str, message: Message, answer_tg_id: int):
     return MessageController.post(
@@ -13,7 +13,7 @@ def send_message(access: str, text: str, message: Message, answer_tg_id: int):
         token=access
     )
 
-async def update_state(message: Message, state: FSMContext, now_state, **kwargs) -> dict[str]:
+async def update_state(message: Message, state: FSMContext, **kwargs) -> dict[str]:
     data = await state.get_data()
     response: ApiResponse = TokenController.check_token(
         access=data.get("access"),
@@ -21,16 +21,12 @@ async def update_state(message: Message, state: FSMContext, now_state, **kwargs)
     )
     if response.is_exception():
         if message is not None:
-            exception = response.get_exception()
             await message.answer(
-                text=f"Пожалуйста авторизируйтесь заново ({exception.message})",
-                reply_markup=UserRK.rk()
+                text=f"Пожалуйста авторизируйтесь заново",
+                reply_markup=AuthRK.rk()
             )
         await state.clear()
         return None
-    await state.set_state(
-        state=now_state
-    )
 
     new_data = {
         "access": response.data.access,
