@@ -23,7 +23,7 @@ class ReserveController:
 
     @classmethod
     def get_state(cls, states: list, page_index: int, token: str):
-        response = send_get_request(
+        response = send_post_request(
             cls.CONTROLLER + "/get_state",
             json={
                 "reserve_states": json.dumps(states),
