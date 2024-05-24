@@ -5,18 +5,21 @@ from aiogram.types import Message
 from aiogram import F, Router
 
 from aiogram.filters import Command, CommandStart
+from bot.keyboard.reply import AuthRK
 
 from bot.states import AuthState, HelpState
 
 router = Router(name=__name__)
 
+@router.message(CommandStart())
 @router.message(AuthState.user, CommandStart())
 @router.message(AuthState.admin, CommandStart())
 @router.message(HelpState.text, CommandStart())
 @router.message(HelpState.documents, CommandStart())
 async def command_start(message: Message, state: FSMContext):
     await message.answer(
-        text="Это старт бота"
+        text="Здраствуйте, Вас приветствует бот парковки!\nПрошу авторизируйтесь",
+        reply_markup=AuthRK.rk()
     )
 
 
