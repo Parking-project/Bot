@@ -10,6 +10,7 @@ class MessageController:
     
     @classmethod
     def post(cls, text, group_id, message_id, answer_tg_id, token):
+        
         response = send_post_request(
             cls.CONTROLLER + "/post",
             json={
